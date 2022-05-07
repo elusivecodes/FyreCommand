@@ -58,13 +58,21 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
+    public function testRunInvalid(): void
+    {
+        $this->assertSame(
+            1,
+            CommandRunner::run('invalid')
+        );
+    }
+
     protected function setUp(): void
     {
         Loader::clear();
         CommandRunner::clear();
 
         Loader::addNamespaces([
-            'Tests\Mock' => 'tests/Mock'
+            'Tests' => 'tests'
         ]);
         CommandRunner::addNamespace('Tests\Mock');
     }

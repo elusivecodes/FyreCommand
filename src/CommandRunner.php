@@ -11,13 +11,13 @@ use
 use function    
     array_filter,
     array_map,
+    array_pop,
     basename,
     class_exists,
     explode,
     implode,
     in_array,
     is_subclass_of,
-    ltrim,
     str_replace,
     trim,
     ucwords;
@@ -52,13 +52,28 @@ abstract class CommandRunner
         $commands = [];
 
         foreach (static::$namespaces AS $namespace) {
-            $paths = Loader::getNamespace(ltrim($namespace, '\\'));
+            $pathParts = [];
             $namespaceCommands = [];
+            $namespaceParts = explode('\\', $namespace);
+            $namespaceParts = array_filter($namespaceParts);
 
-            foreach ($paths AS $path) {
-                $folder = new Folder($path);
-                static::findCommands($folder, $namespace, $namespaceCommands);
-            }
+            do {
+                $currentNamespace = implode('\\', $namespaceParts).'\\';
+                $paths = Loader::getNamespace($currentNamespace);
+
+                foreach ($paths AS $path) {
+                    $fullPath = $path;
+                    if ($pathParts !== []) {
+                        $fullPath .= '/'.implode('/', $pathParts);
+                    }
+
+                    $folder = new Folder($fullPath);
+                    static::findCommands($folder, $namespace, $namespaceCommands);
+                }
+
+                $pathParts[] = array_pop($namespaceParts);
+            } while ($namespaceParts !== []);
+
 
             $commands[$namespace] = $namespaceCommands;
         }
