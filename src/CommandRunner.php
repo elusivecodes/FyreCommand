@@ -4,15 +4,17 @@ declare(strict_types=1);
 namespace Fyre\Command;
 
 use
+    Fyre\Console\Console,
     Fyre\FileSystem\Folder,
     Fyre\Loader\Loader,
+    InvalidArgumentException,
     Throwable;
 
 use function    
     array_filter,
     array_map,
     array_pop,
-    basename,
+    array_shift,
     class_exists,
     explode,
     implode,
@@ -90,10 +92,50 @@ abstract class CommandRunner
     }
 
     /**
+     * Handle an argv command.
+     * @param array $argv The CLI arguments.
+     * @return int The exit code of the command.
+     */
+    public static function handle(array $argv): int
+    {
+        array_shift($argv);
+
+        $command = array_shift($argv);
+
+        if ($command) {
+            try {
+                return static::run($command, $argv);
+            } catch (Throwable $e) {
+                Console::error($e->getMessage());
+
+                return Command::CODE_ERROR;
+            }
+        }
+
+        $allCommands = static::all();
+
+        $data = [];
+        foreach ($allCommands AS $namespace => $commands) {
+            foreach ($commands AS $command => $info) {
+                $data[] = [
+                    Console::color($command, ['foreground' => 'green']),
+                    $info['name'],
+                    $info['description']
+                ];
+            }
+        }
+
+        Console::table($data, ['Command', 'Name', 'Description']);
+
+        return Command::CODE_SUCCESS;
+    }
+
+    /**
      * Run a command.
      * @param string $command The command.
      * @param array $arguments The arguments.
      * @return int The exit code.
+     * @throws InvalidArgumentException if the command is not valid.
      */
     public static function run(string $command, array $arguments = []): int
     {
@@ -117,7 +159,7 @@ abstract class CommandRunner
             return static::runCommand($class, $arguments);
         }
 
-        return Command::CODE_ERROR;
+        throw new InvalidArgumentException('Invalid command: '.$command);
     }
 
     /**
@@ -147,9 +189,7 @@ abstract class CommandRunner
 
         foreach ($children AS $child) {
             if ($child instanceof Folder) {
-                $path = $child->path();
-                $name = basename($path);
-                $commandName = $prefix.$name;
+                $commandName = $prefix.$child->name();
     
                 static::findCommands($child, $namespace, $commands, $commandName.'\\');
                 continue;

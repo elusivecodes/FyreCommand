@@ -55,6 +55,16 @@ Clear all namespaces.
 CommandRunner::clear();
 ```
 
+**Handle**
+
+Handle an argv command.
+
+- `$argv` is an array containing the CLI arguments.
+
+```php
+$code = CommandRunner::handle($argv);
+```
+
 **Run**
 
 Run a command.

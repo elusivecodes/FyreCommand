@@ -4,20 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18e2369f4e039a2ff4d60cfc9ad27b8e",
+    "content-hash": "755d524f448452ec81ef1be0e15053f5",
     "packages": [
         {
-            "name": "fyre/filesystem",
-            "version": "v1.0.8",
+            "name": "fyre/console",
+            "version": "v1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/elusivecodes/FyreFileSystem.git",
-                "reference": "9da5a22cbd366b465cfa1d4c32a7913cc83db3ac"
+                "url": "https://github.com/elusivecodes/FyreConsole.git",
+                "reference": "262277c6b8486b488c6deeb16fa0bd8fd867a621"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elusivecodes/FyreFileSystem/zipball/9da5a22cbd366b465cfa1d4c32a7913cc83db3ac",
-                "reference": "9da5a22cbd366b465cfa1d4c32a7913cc83db3ac",
+                "url": "https://api.github.com/repos/elusivecodes/FyreConsole/zipball/262277c6b8486b488c6deeb16fa0bd8fd867a621",
+                "reference": "262277c6b8486b488c6deeb16fa0bd8fd867a621",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Fyre\\Console\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "elusivecodes",
+                    "email": "elusivecodes@gmail.com"
+                }
+            ],
+            "description": "A CLI library.",
+            "support": {
+                "issues": "https://github.com/elusivecodes/FyreConsole/issues",
+                "source": "https://github.com/elusivecodes/FyreConsole/tree/v1.0"
+            },
+            "time": "2022-05-06T11:37:40+00:00"
+        },
+        {
+            "name": "fyre/filesystem",
+            "version": "v1.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/elusivecodes/FyreFileSystem.git",
+                "reference": "5946e3f3eb285a84d4ed7d4c1dac379953bb0730"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/elusivecodes/FyreFileSystem/zipball/5946e3f3eb285a84d4ed7d4c1dac379953bb0730",
+                "reference": "5946e3f3eb285a84d4ed7d4c1dac379953bb0730",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +85,9 @@
             "description": "A file/folder library.",
             "support": {
                 "issues": "https://github.com/elusivecodes/FyreFileSystem/issues",
-                "source": "https://github.com/elusivecodes/FyreFileSystem/tree/v1.0.8"
+                "source": "https://github.com/elusivecodes/FyreFileSystem/tree/v1.0.9"
             },
-            "time": "2022-04-04T08:24:08+00:00"
+            "time": "2022-05-08T07:31:48+00:00"
         },
         {
             "name": "fyre/loader",

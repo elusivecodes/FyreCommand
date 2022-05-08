@@ -6,6 +6,7 @@ namespace Tests;
 use
     Fyre\Command\CommandRunner,
     Fyre\Loader\Loader,
+    InvalidArgumentException,
     PHPUnit\Framework\TestCase;
 
 final class CommandRunnerTest extends TestCase
@@ -31,6 +32,22 @@ final class CommandRunnerTest extends TestCase
                 ]
             ],
             CommandRunner::all()
+        );
+    }
+
+    public function testHandleCommand()
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'test'])
+        );
+    }
+
+    public function testHandleCommandArguments()
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'arguments', 'value'])
         );
     }
 
@@ -60,10 +77,9 @@ final class CommandRunnerTest extends TestCase
 
     public function testRunInvalid(): void
     {
-        $this->assertSame(
-            1,
-            CommandRunner::run('invalid')
-        );
+        $this->expectException(InvalidArgumentException::class);
+
+        CommandRunner::run('invalid');
     }
 
     protected function setUp(): void
