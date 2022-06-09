@@ -20,6 +20,8 @@ use function
     implode,
     in_array,
     is_subclass_of,
+    lcfirst,
+    preg_match,
     str_replace,
     trim,
     ucwords;
@@ -98,13 +100,11 @@ abstract class CommandRunner
      */
     public static function handle(array $argv): int
     {
-        array_shift($argv);
-
-        $command = array_shift($argv);
+        [$command, $arguments] = static::parseArguments($argv);
 
         if ($command) {
             try {
-                return static::run($command, $argv);
+                return static::run($command, $arguments);
             } catch (Throwable $e) {
                 Console::error($e->getMessage());
 
@@ -156,7 +156,9 @@ abstract class CommandRunner
                 continue;
             }
 
-            return static::runCommand($class, $arguments);
+            $command = new $class;
+
+            return $command->run($arguments) ?? Command::CODE_SUCCESS;
         }
 
         throw new InvalidArgumentException('Invalid command: '.$command);
@@ -232,20 +234,31 @@ abstract class CommandRunner
     }
 
     /**
-     * Run a command.
-     * @param string $class The class name.
-     * @param array $arguments The arguments.
-     * @return int The exit code.
+     * Parse the command and arguments from argv.
+     * @param array $argv The CLI arguments.
+     * @return array The command and arguments.
      */
-    protected static function runCommand(string $class, array $arguments): int
+    protected static function parseArguments(array $argv): array
     {
-        try {
-            $command = new $class;
+        array_shift($argv);
 
-            return $command->run($arguments) ?? Command::CODE_SUCCESS;
-        } catch (Throwable $e) {
-            return $e->getCode();
+        $command = array_shift($argv);
+
+        $arguments = [];
+
+        $key = null;
+        foreach ($argv AS $arg) {
+            if (preg_match('/^--?(.*)$/', $arg, $match)) {
+                $key = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $match[1]))));
+            } else if ($key !== null) {
+                $arguments[$key] = $arg;
+                $key = null;
+            } else {
+                $arguments[] = $arg;
+            }
         }
+
+        return [$command, $arguments];
     }
 
 }

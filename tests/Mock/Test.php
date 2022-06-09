@@ -13,9 +13,8 @@ class Test extends Command
 
     protected string $description = 'This is a test command.';
 
-    public function run(array $arguments = []): int|null
+    public function run(array $arguments = [])
     {
-        
     }
 
 }

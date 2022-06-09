@@ -9,7 +9,7 @@ use
 class AnotherCommand extends Command
 {
 
-    public function run(array $arguments = []): int|null
+    public function run(array $arguments = [])
     {
         return static::CODE_ERROR;
     }

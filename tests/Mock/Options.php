@@ -7,14 +7,14 @@ use
     Fyre\Command\Command;
 
 use function
-    count;
+    array_key_exists;
 
-class Arguments extends Command
+class Options extends Command
 {
 
     public function run(array $arguments = [])
     {
-        return count($arguments) && $arguments[0] === 'value' ?
+        return array_key_exists('test', $arguments) && $arguments['test'] === 'value' ?
             static::CODE_SUCCESS :
             static::CODE_ERROR;
     }

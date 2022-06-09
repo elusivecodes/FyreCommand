@@ -25,6 +25,10 @@ final class CommandRunnerTest extends TestCase
                         'name' => 'AnotherCommand',
                         'description' => ''
                     ],
+                    'Options' => [
+                        'name' => 'Options',
+                        'description' => ''
+                    ],
                     'Test' => [
                         'name' => 'Test Command',
                         'description' => 'This is a test command.'
@@ -48,6 +52,14 @@ final class CommandRunnerTest extends TestCase
         $this->assertSame(
             0,
             CommandRunner::handle(['', 'arguments', 'value'])
+        );
+    }
+
+    public function testHandleCommandArgumentOpts()
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'options', '--test', 'value'])
         );
     }
 

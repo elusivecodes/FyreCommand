@@ -41,8 +41,8 @@ abstract class Command
     /**
      * Run the command.
      * @param array $arguments The command arguments.
-     * @return int|null The exit code.
+     * @return mixed The exit code.
      */
-    abstract public function run(array $arguments = []): int|null;
+    abstract public function run(array $arguments = []);
 
 }
