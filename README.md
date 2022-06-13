@@ -57,7 +57,7 @@ CommandRunner::clear();
 
 **Handle**
 
-Handle an argv command.
+Handle an argv [*Command*](#commands).
 
 - `$argv` is an array containing the CLI arguments.
 
@@ -67,7 +67,7 @@ $code = CommandRunner::handle($argv);
 
 **Run**
 
-Run a command.
+Run a [*Command*](#commands).
 
 - `$command` is a string representing the command.
 - `$arguments` is an array containing arguments for the command, and will default to *[]*.
@@ -89,7 +89,7 @@ Get the command description.
 $description = $command->getDescription();
 ```
 
-The description can be set by defining the `$description` property on your command.
+The description can be set by defining the `$description` property on the command.
 
 **Get Name**
 
@@ -99,7 +99,7 @@ Get the command name.
 $name = $command->getName();
 ```
 
-The name can be set by defining the `$name` property on your command, otherwise the class name will be used by default.
+The name can be set by defining the `$name` property on the command, otherwise the class name will be used by default.
 
 **Run**
 
