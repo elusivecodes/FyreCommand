@@ -6,6 +6,9 @@ namespace Fyre\Command;
 use
     ReflectionClass;
 
+use function
+    preg_replace;
+
 /**
  * Command
  */
@@ -16,7 +19,7 @@ abstract class Command
 
     public const CODE_ERROR = 1;
 
-    protected string $name = '';
+    protected string|null $name = null;
 
     protected string $description = '';
 
@@ -35,7 +38,7 @@ abstract class Command
      */
     public function getName(): string
     {
-        return $this->name ?: (new ReflectionClass($this))->getShortName();
+        return $this->name ??= preg_replace('/Command$/', '', (new ReflectionClass($this))->getShortName());
     }
 
     /**

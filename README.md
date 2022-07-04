@@ -79,7 +79,7 @@ $code = CommandRunner::run($command, $arguments);
 
 ## Commands
 
-Custom commands can be created by extending `\Fyre\Command\Command`, ensuring the `run` method is implemented.
+Custom commands can be created by extending `\Fyre\Command\Command`, suffixing the class name with "*Command*", and ensuring the `run` method is implemented.
 
 **Get Description**
 

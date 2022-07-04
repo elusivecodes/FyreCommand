@@ -17,19 +17,19 @@ final class CommandRunnerTest extends TestCase
         $this->assertSame(
             [
                 '\Tests\Mock\\' => [
-                    'Arguments' => [
+                    'ArgumentsCommand' => [
                         'name' => 'Arguments',
                         'description' => ''
                     ],
                     'Deep\AnotherCommand' => [
-                        'name' => 'AnotherCommand',
+                        'name' => 'Another',
                         'description' => ''
                     ],
-                    'Options' => [
+                    'OptionsCommand' => [
                         'name' => 'Options',
                         'description' => ''
                     ],
-                    'Test' => [
+                    'TestCommand' => [
                         'name' => 'Test Command',
                         'description' => 'This is a test command.'
                     ]
@@ -75,7 +75,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             1,
-            CommandRunner::run('deep/another_command')
+            CommandRunner::run('deep/another')
         );
     }
 

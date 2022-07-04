@@ -5,8 +5,8 @@ namespace Tests;
 
 use
     PHPUnit\Framework\TestCase,
-    Tests\Mock\Arguments,
-    Tests\Mock\Test;
+    Tests\Mock\ArgumentsCommand,
+    Tests\Mock\TestCommand;
 
 final class CommandTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'This is a test command.',
-            (new Test)->getDescription()
+            (new TestCommand)->getDescription()
         );
     }
 
@@ -23,7 +23,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Test Command',
-            (new Test)->getName()
+            (new TestCommand)->getName()
         );
     }
 
@@ -31,7 +31,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Arguments',
-            (new Arguments)->getName()
+            (new ArgumentsCommand)->getName()
         );
     }
 

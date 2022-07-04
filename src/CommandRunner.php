@@ -150,7 +150,7 @@ abstract class CommandRunner
         $commandSegments = implode('\\', $segments);
 
         foreach (static::$namespaces AS $namespace) {
-            $class = $namespace.$commandSegments;
+            $class = $namespace.$commandSegments.'Command';
 
             if (!class_exists($class)) {
                 continue;

@@ -6,10 +6,10 @@ namespace Tests\Mock;
 use
     Fyre\Command\Command;
 
-class Test extends Command
+class TestCommand extends Command
 {
 
-    protected string $name = 'Test Command';
+    protected string|null $name = 'Test Command';
 
     protected string $description = 'This is a test command.';
 
