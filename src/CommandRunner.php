@@ -8,6 +8,7 @@ use
     Fyre\FileSystem\Folder,
     Fyre\Loader\Loader,
     InvalidArgumentException,
+    ReflectionClass,
     Throwable;
 
 use function    
@@ -206,7 +207,11 @@ abstract class CommandRunner
 
             $className = $namespace.$commandName;
 
-            if (!class_exists($className) || !is_subclass_of($className, Command::class)) {
+            if (
+                !class_exists($className) ||
+                !is_subclass_of($className, Command::class) ||
+                (new ReflectionClass($className))->isAbstract()
+            ) {
                 continue;
             }
 
