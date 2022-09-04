@@ -23,7 +23,11 @@ use function
     is_subclass_of,
     lcfirst,
     preg_match,
+    preg_replace,
+    str_ends_with,
     str_replace,
+    strtolower,
+    substr,
     trim,
     ucwords;
 
@@ -117,7 +121,10 @@ abstract class CommandRunner
 
         $data = [];
         foreach ($allCommands AS $namespace => $commands) {
-            foreach ($commands AS $command => $info) {
+            foreach ($commands AS $commandName => $info) {
+                $command = substr($commandName, 0, -7);
+                $command = static::commandify($command);
+
                 $data[] = [
                     Console::color($command, ['foreground' => 'green']),
                     $info['name'],
@@ -180,6 +187,19 @@ abstract class CommandRunner
     }
 
     /**
+     * Convert a string as a command name.
+     * @param string $string The input string.
+     * @return string The command name.
+     */
+    protected static function commandify(string $string): string
+    {
+        $string = preg_replace('/(?<!^)[A-Z]/', '_\0', $string);
+        $string = strtolower($string);
+
+        return $string;
+    }
+
+    /**
      * Find commands in a Folder.
      * @param Folder $folder The Folder.
      * @param string $namespace The root namespace.
@@ -203,15 +223,22 @@ abstract class CommandRunner
             }
 
             $name = $child->fileName();
+
+            if (!str_ends_with($name, 'Command')) {
+                continue;
+            }
+
             $commandName = $prefix.$name;
 
             $className = $namespace.$commandName;
 
-            if (
-                !class_exists($className) ||
-                !is_subclass_of($className, Command::class) ||
-                (new ReflectionClass($className))->isAbstract()
-            ) {
+            if (!class_exists($className) || !is_subclass_of($className, Command::class)) {
+                continue;
+            }
+
+            $reflection = new ReflectionClass($className);
+
+            if ($reflection->isAbstract()) {
                 continue;
             }
 
