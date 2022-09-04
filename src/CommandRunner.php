@@ -68,7 +68,7 @@ abstract class CommandRunner
 
             do {
                 $currentNamespace = implode('\\', $namespaceParts).'\\';
-                $paths = Loader::getNamespace($currentNamespace);
+                $paths = Loader::getNamespacePaths($currentNamespace);
 
                 foreach ($paths AS $path) {
                     $fullPath = $path;
