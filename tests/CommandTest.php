@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use
-    PHPUnit\Framework\TestCase,
-    Tests\Mock\ArgumentsCommand,
-    Tests\Mock\TestCommand;
+use PHPUnit\Framework\TestCase;
+use Tests\Mock\ArgumentsCommand;
+use Tests\Mock\TestCommand;
 
 final class CommandTest extends TestCase
 {

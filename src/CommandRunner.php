@@ -3,33 +3,32 @@ declare(strict_types=1);
 
 namespace Fyre\Command;
 
-use
-    Fyre\Console\Console,
-    Fyre\FileSystem\Folder,
-    Fyre\Loader\Loader,
-    InvalidArgumentException,
-    ReflectionClass,
-    Throwable;
+use Fyre\Console\Console;
+use Fyre\FileSystem\Folder;
+use Fyre\Loader\Loader;
+use InvalidArgumentException;
+use ReflectionClass;
+use Throwable;
 
-use function    
-    array_filter,
-    array_map,
-    array_pop,
-    array_shift,
-    class_exists,
-    explode,
-    implode,
-    in_array,
-    is_subclass_of,
-    lcfirst,
-    preg_match,
-    preg_replace,
-    str_ends_with,
-    str_replace,
-    strtolower,
-    substr,
-    trim,
-    ucwords;
+use function array_filter;
+use function array_map;
+use function array_pop;
+use function array_shift;
+use function array_splice;
+use function class_exists;
+use function explode;
+use function implode;
+use function in_array;
+use function is_subclass_of;
+use function lcfirst;
+use function preg_match;
+use function preg_replace;
+use function str_ends_with;
+use function str_replace;
+use function strtolower;
+use function substr;
+use function trim;
+use function ucwords;
 
 /**
  * CommandRunner
@@ -83,7 +82,6 @@ abstract class CommandRunner
                 $pathParts[] = array_pop($namespaceParts);
             } while ($namespaceParts !== []);
 
-
             $commands[$namespace] = $namespaceCommands;
         }
 
@@ -96,6 +94,15 @@ abstract class CommandRunner
     public static function clear(): void
     {
         static::$namespaces = [];
+    }
+
+    /**
+     * Get the namespaces.
+     * @return array The namespaces.
+     */
+    public static function getNamespaces(): array
+    {
+        return static::$namespaces;
     }
 
     /**
@@ -136,6 +143,40 @@ abstract class CommandRunner
         Console::table($data, ['Command', 'Name', 'Description']);
 
         return Command::CODE_SUCCESS;
+    }
+
+    /**
+     * Determine if a namespace exists.
+     * @param string $namespace The namespace.
+     * @return bool TRUE if the namespace exists, otherwise FALSE.
+     */
+    public static function hasNamespace(string $namespace): bool
+    {
+        $namespace = static::normalizeNamespace($namespace);
+
+        return in_array($namespace, static::$namespaces);
+    }
+
+    /**
+     * Remove a namespace.
+     * @param string $namespace The namespace.
+     * @return bool TRUE If the namespace was removed, otherwise FALSE.
+     */
+    public static function removeNamespace(string $namespace): bool
+    {
+        $namespace = static::normalizeNamespace($namespace);
+
+        foreach (static::$namespaces AS $i => $otherNamespace) {
+            if ($otherNamespace !== $namespace) {
+                continue;
+            }
+
+            array_splice(static::$namespaces, $i, 1);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

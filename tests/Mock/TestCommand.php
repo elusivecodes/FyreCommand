@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Mock;
 
-use
-    Fyre\Command\Command;
+use Fyre\Command\Command;
 
 class TestCommand extends Command
 {

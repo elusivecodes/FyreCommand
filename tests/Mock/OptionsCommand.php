@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace Tests\Mock;
 
-use
-    Fyre\Command\Command;
+use Fyre\Command\Command;
 
-use function
-    array_key_exists;
+use function array_key_exists;
 
 class OptionsCommand extends Command
 {

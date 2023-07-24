@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace Fyre\Command;
 
-use
-    ReflectionClass;
+use ReflectionClass;
 
-use function
-    preg_replace;
+use function preg_replace;
 
 /**
  * Command

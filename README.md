@@ -1,6 +1,6 @@
 # FyreCommand
 
-**FyreCommand** is a free, command library for *PHP*.
+**FyreCommand** is a free, open-source CLI command library for *PHP*.
 
 
 ## Table Of Contents
@@ -55,6 +55,14 @@ Clear all namespaces.
 CommandRunner::clear();
 ```
 
+**Get Namespaces**
+
+Get the namespaces.
+
+```php
+$namespaces = CommandRunner::getNamespaces();
+```
+
 **Handle**
 
 Handle an argv [*Command*](#commands).
@@ -63,6 +71,26 @@ Handle an argv [*Command*](#commands).
 
 ```php
 $code = CommandRunner::handle($argv);
+```
+
+**Has Namespace**
+
+Check if a namespace exists.
+
+- `$namespace` is a string representing the namespace.
+
+```php
+$hasNamespace = CommandRunner::hasNamespace($namespace);
+```
+
+**Remove Namespace**
+
+Remove a namespace.
+
+- `$namespace` is a string representing the namespace.
+
+```php
+$removed = CommandRunner::removeNamespace($namespace);
 ```
 
 **Run**

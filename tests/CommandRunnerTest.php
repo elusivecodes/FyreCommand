@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use
-    Fyre\Command\CommandRunner,
-    Fyre\Loader\Loader,
-    InvalidArgumentException,
-    PHPUnit\Framework\TestCase;
+use Fyre\Command\CommandRunner;
+use Fyre\Loader\Loader;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 final class CommandRunnerTest extends TestCase
 {
@@ -39,7 +38,17 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
-    public function testHandleCommand()
+    public function testGetNamepaces(): void
+    {
+        $this->assertSame(
+            [
+                '\Tests\Mock\\'
+            ],
+            CommandRunner::getNamespaces()
+        );
+    }
+
+    public function testHandleCommand(): void
     {
         $this->assertSame(
             0,
@@ -47,7 +56,7 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
-    public function testHandleCommandArguments()
+    public function testHandleCommandArguments(): void
     {
         $this->assertSame(
             0,
@@ -55,11 +64,43 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
-    public function testHandleCommandArgumentOpts()
+    public function testHandleCommandArgumentOpts(): void
     {
         $this->assertSame(
             0,
             CommandRunner::handle(['', 'options', '--test', 'value'])
+        );
+    }
+
+    public function testHasNamespace(): void
+    {
+        $this->assertTrue(
+            CommandRunner::hasNamespace('Tests\Mock')
+        );
+    }
+
+    public function testHasInvalid(): void
+    {
+        $this->assertFalse(
+            CommandRunner::hasNamespace('Tests\Invalid')
+        );
+    }
+
+    public function testRemoveNamespace(): void
+    {
+        $this->assertTrue(
+            CommandRunner::removeNamespace('Tests\Mock')
+        );
+
+        $this->assertFalse(
+            CommandRunner::hasNamespace('Tests\Mock')
+        );
+    }
+
+    public function testRemoveNamespaceInvalid(): void
+    {
+        $this->assertFalse(
+            CommandRunner::removeNamespace('Tests\Invalid')
         );
     }
 

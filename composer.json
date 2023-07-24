@@ -19,12 +19,12 @@
             "Tests\\": "tests/"
         }
     },
-    "require-dev": {
-        "phpunit/phpunit": "^9"
-    },
     "require": {
-        "fyre/console": "^1.0",
-        "fyre/filesystem": "^1.0",
-        "fyre/loader": "^1.0"
+        "fyre/console": "^2.0",
+        "fyre/filesystem": "^2.0",
+        "fyre/loader": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10"
     }
 }
