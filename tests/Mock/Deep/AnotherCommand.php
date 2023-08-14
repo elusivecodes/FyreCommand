@@ -8,7 +8,7 @@ use Fyre\Command\Command;
 class AnotherCommand extends Command
 {
 
-    public function run(array $arguments = [])
+    public function run(array $arguments = []): int
     {
         return static::CODE_ERROR;
     }

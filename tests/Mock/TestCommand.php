@@ -12,7 +12,7 @@ class TestCommand extends Command
 
     protected string $description = 'This is a test command.';
 
-    public function run(array $arguments = [])
+    public function run(array $arguments = []): void
     {
     }
 
