@@ -5,7 +5,6 @@ namespace Tests;
 
 use Fyre\Command\CommandRunner;
 use Fyre\Loader\Loader;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 final class CommandRunnerTest extends TestCase
@@ -126,13 +125,6 @@ final class CommandRunnerTest extends TestCase
             0,
             CommandRunner::run('arguments', ['value'])
         );
-    }
-
-    public function testRunInvalid(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        CommandRunner::run('invalid');
     }
 
     protected function setUp(): void

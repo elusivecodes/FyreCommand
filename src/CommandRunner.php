@@ -6,7 +6,6 @@ namespace Fyre\Command;
 use Fyre\Console\Console;
 use Fyre\FileSystem\Folder;
 use Fyre\Loader\Loader;
-use InvalidArgumentException;
 use ReflectionClass;
 use Throwable;
 
@@ -115,13 +114,7 @@ abstract class CommandRunner
         [$command, $arguments] = static::parseArguments($argv);
 
         if ($command) {
-            try {
-                return static::run($command, $arguments);
-            } catch (Throwable $e) {
-                Console::error($e->getMessage());
-
-                return Command::CODE_ERROR;
-            }
+            return static::run($command, $arguments);
         }
 
         $allCommands = static::all();
@@ -184,7 +177,6 @@ abstract class CommandRunner
      * @param string $command The command.
      * @param array $arguments The arguments.
      * @return int The exit code.
-     * @throws InvalidArgumentException if the command is not valid.
      */
     public static function run(string $command, array $arguments = []): int
     {
@@ -210,7 +202,9 @@ abstract class CommandRunner
             return $command->run($arguments) ?? Command::CODE_SUCCESS;
         }
 
-        throw new InvalidArgumentException('Invalid command: '.$command);
+        Console::error('Invalid command: '.$command);
+
+        return Command::CODE_ERROR;
     }
 
     /**
