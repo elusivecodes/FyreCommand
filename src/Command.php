@@ -17,9 +17,20 @@ abstract class Command
 
     public const CODE_ERROR = 1;
 
+    protected string|null $alias = null;
+
     protected string|null $name = null;
 
     protected string $description = '';
+
+    /**
+     * Get the command alias.
+     * @return string The command alias.
+     */
+    public function getAlias(): string
+    {
+        return $this->alias ??= strtolower($this->getName());
+    }
 
     /**
      * Get the command description.

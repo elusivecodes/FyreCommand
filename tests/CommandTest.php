@@ -10,6 +10,22 @@ use Tests\Mock\TestCommand;
 final class CommandTest extends TestCase
 {
 
+    public function testGetAlias(): void
+    {
+        $this->assertSame(
+            'tester',
+            (new TestCommand)->getAlias()
+        );
+    }
+
+    public function testGetAliasDefault(): void
+    {
+        $this->assertSame(
+            'arguments',
+            (new ArgumentsCommand)->getAlias()
+        );
+    }
+
     public function testGetDescription(): void
     {
         $this->assertSame(

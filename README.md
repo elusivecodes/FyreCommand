@@ -45,11 +45,11 @@ Get all available commands.
 $commands = CommandRunner::all();
 ```
 
-This method will return an 2-dimensional array, where the key is the namespace and the value is an array of commands found in the namespace.
+This method will return an array where the key is the command alias, and the value is an instance of the command.
 
 **Clear**
 
-Clear all namespaces.
+Clear all namespaces and loaded commands.
 
 ```php
 CommandRunner::clear();
@@ -71,6 +71,16 @@ Handle an argv [*Command*](#commands).
 
 ```php
 $code = CommandRunner::handle($argv);
+```
+
+**Has Command**
+
+Check if a command exists.
+
+- `$alias` is a string representing the command alias.
+
+```php
+$hasCommand = CommandRunner::hasCommand($alias);
 ```
 
 **Has Namespace**
@@ -97,17 +107,27 @@ $removed = CommandRunner::removeNamespace($namespace);
 
 Run a [*Command*](#commands).
 
-- `$command` is a string representing the command.
+- `$alias` is a string representing the command alias.
 - `$arguments` is an array containing arguments for the command, and will default to *[]*.
 
 ```php
-$code = CommandRunner::run($command, $arguments);
+$code = CommandRunner::run($alias, $arguments);
 ```
 
 
 ## Commands
 
 Custom commands can be created by extending `\Fyre\Command\Command`, suffixing the class name with "*Command*", and ensuring the `run` method is implemented.
+
+**Alias**
+
+Get the command alias.
+
+```php
+$alias = $command->getAlias();
+```
+
+The alias can be set by defining the `$alias` property on the command, otherwise the class name will be used by default.
 
 **Get Description**
 

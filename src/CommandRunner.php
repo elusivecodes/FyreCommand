@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace Fyre\Command;
 
 use Fyre\Console\Console;
-use Fyre\FileSystem\Folder;
 use Fyre\Loader\Loader;
 use ReflectionClass;
-use Throwable;
 
+use const PATHINFO_FILENAME;
+
+use function array_diff;
 use function array_filter;
-use function array_map;
+use function array_key_exists;
 use function array_pop;
 use function array_shift;
 use function array_splice;
@@ -20,12 +21,11 @@ use function implode;
 use function in_array;
 use function is_subclass_of;
 use function lcfirst;
+use function pathinfo;
 use function preg_match;
-use function preg_replace;
+use function scandir;
 use function str_ends_with;
 use function str_replace;
-use function strtolower;
-use function substr;
 use function trim;
 use function ucwords;
 
@@ -36,6 +36,8 @@ abstract class CommandRunner
 {
 
     protected static array $namespaces = [];
+
+    protected static array|null $commands = null;
 
     /**
      * Add a namespace for loading commands.
@@ -56,11 +58,14 @@ abstract class CommandRunner
      */
     public static function all(): array
     {
-        $commands = [];
+        if (static::$commands !== null) {
+            return static::$commands;
+        }
+
+        static::$commands = [];
 
         foreach (static::$namespaces AS $namespace) {
             $pathParts = [];
-            $namespaceCommands = [];
             $namespaceParts = explode('\\', $namespace);
             $namespaceParts = array_filter($namespaceParts);
 
@@ -74,25 +79,23 @@ abstract class CommandRunner
                         $fullPath .= '/'.implode('/', $pathParts);
                     }
 
-                    $folder = new Folder($fullPath);
-                    static::findCommands($folder, $namespace, $namespaceCommands);
+                    static::$commands += static::findCommands($fullPath, $namespace);
                 }
 
                 $pathParts[] = array_pop($namespaceParts);
             } while ($namespaceParts !== []);
-
-            $commands[$namespace] = $namespaceCommands;
         }
 
-        return $commands;
+        return static::$commands;
     }
 
     /**
-     * Clear all namespaces.
+     * Clear all namespaces and loaded commands.
      */
     public static function clear(): void
     {
         static::$namespaces = [];
+        static::$commands = null;
     }
 
     /**
@@ -120,15 +123,12 @@ abstract class CommandRunner
         $allCommands = static::all();
 
         $data = [];
-        foreach ($allCommands AS $namespace => $commands) {
-            foreach ($commands AS $commandName => $info) {
-                $command = substr($commandName, 0, -7);
-                $command = static::commandify($command);
-
+        foreach ($allCommands AS $commands) {
+            foreach ($commands AS $alias => $command) {
                 $data[] = [
-                    Console::color($command, ['foreground' => 'green']),
-                    $info['name'],
-                    $info['description']
+                    Console::style($alias, ['color' => Console::GREEN]),
+                    $command->getName(),
+                    $command->getDescription()
                 ];
             }
         }
@@ -136,6 +136,16 @@ abstract class CommandRunner
         Console::table($data, ['Command', 'Name', 'Description']);
 
         return Command::CODE_SUCCESS;
+    }
+
+    /**
+     * Determine if a command exists.
+     * @param string $alias The command alias.
+     * @return bool TRUE if the command exists, otherwise FALSE.
+     */
+    public static function hasCommand(string $alias): bool
+    {
+        return array_key_exists($alias, static::all());
     }
 
     /**
@@ -174,98 +184,41 @@ abstract class CommandRunner
 
     /**
      * Run a command.
-     * @param string $command The command.
+     * @param string $alias The command alias.
      * @param array $arguments The arguments.
      * @return int The exit code.
      */
-    public static function run(string $command, array $arguments = []): int
+    public static function run(string $alias, array $arguments = []): int
     {
-        $segments = explode('/', $command);
-        $segments = array_filter($segments);
+        $commands = static::all();
 
-        $segments = array_map(
-            fn(string $segment): string => static::classify($segment),
-            $segments
-        );
-
-        $commandSegments = implode('\\', $segments);
-
-        foreach (static::$namespaces AS $namespace) {
-            $class = $namespace.$commandSegments.'Command';
-
-            if (!class_exists($class)) {
-                continue;
-            }
-
-            $command = new $class;
-
-            return $command->run($arguments) ?? Command::CODE_SUCCESS;
+        if (array_key_exists($alias, $commands)) {
+            return $commands[$alias]->run($arguments) ?? Command::CODE_SUCCESS;
         }
 
-        Console::error('Invalid command: '.$command);
+        Console::error('Invalid command: '.$alias);
 
         return Command::CODE_ERROR;
     }
 
     /**
-     * Convert a string as a class name.
-     * @param string $string The input string.
-     * @return string The class name.
-     */
-    protected static function classify(string $string): string
-    {
-        $string = str_replace('_', ' ', $string);
-        $string = ucwords($string);
-        $string = str_replace(' ', '', $string);
-
-        return $string;
-    }
-
-    /**
-     * Convert a string as a command name.
-     * @param string $string The input string.
-     * @return string The command name.
-     */
-    protected static function commandify(string $string): string
-    {
-        $string = preg_replace('/(?<!^)[A-Z]/', '_\0', $string);
-        $string = strtolower($string);
-
-        return $string;
-    }
-
-    /**
      * Find commands in a Folder.
-     * @param Folder $folder The Folder.
+     * @param string $path The path.
      * @param string $namespace The root namespace.
-     * @param array $commands The commands.
-     * @param string $prefix The command prefix.
+     * @return array The commands.
      */
-    protected static function findCommands(Folder $folder, string $namespace, array &$commands, string $prefix = ''): void
+    protected static function findCommands(string $path, string $namespace): array
     {
-        $children = $folder->contents();
+        $files = array_diff(scandir($path), ['.', '..']);
 
-        foreach ($children AS $child) {
-            if ($child instanceof Folder) {
-                $commandName = $prefix.$child->name();
-    
-                static::findCommands($child, $namespace, $commands, $commandName.'\\');
+        foreach ($files AS $file) {
+            if (!str_ends_with($file, 'Command.php')) {
                 continue;
             }
 
-            if ($child->extension() !== 'php') {
-                continue;
-            }
+            $name = pathinfo($file, PATHINFO_FILENAME);
 
-            $name = $child->fileName();
-
-            if (!str_ends_with($name, 'Command')) {
-                continue;
-            }
-
-            $commandName = $prefix.$name;
-
-            $className = $namespace.$commandName;
+            $className = $namespace.$name;
 
             if (!class_exists($className) || !is_subclass_of($className, Command::class)) {
                 continue;
@@ -279,11 +232,12 @@ abstract class CommandRunner
 
             $command = new $className;
 
-            $commands[$commandName] = [
-                'name' => $command->getName(),
-                'description' => $command->getDescription()
-            ];
+            $alias = $command->getAlias();
+
+            $commands[$alias] = $command;
         }
+
+        return $commands;
     }
 
     /**

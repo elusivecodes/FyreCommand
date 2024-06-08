@@ -3,38 +3,32 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Fyre\Command\Command;
 use Fyre\Command\CommandRunner;
 use Fyre\Loader\Loader;
 use PHPUnit\Framework\TestCase;
+
+use function array_keys;
 
 final class CommandRunnerTest extends TestCase
 {
 
     public function testAll(): void
     {
+        $commands = CommandRunner::all();
+
         $this->assertSame(
             [
-                '\Tests\Mock\\' => [
-                    'ArgumentsCommand' => [
-                        'name' => 'Arguments',
-                        'description' => ''
-                    ],
-                    'Deep\AnotherCommand' => [
-                        'name' => 'Another',
-                        'description' => ''
-                    ],
-                    'OptionsCommand' => [
-                        'name' => 'Options',
-                        'description' => ''
-                    ],
-                    'TestCommand' => [
-                        'name' => 'Test Command',
-                        'description' => 'This is a test command.'
-                    ]
-                ]
+                'arguments',
+                'options',
+                'tester'
             ],
-            CommandRunner::all()
+            array_keys($commands)
         );
+
+        foreach ($commands AS $command) {
+            $this->assertInstanceOf(Command::class, $command);
+        }
     }
 
     public function testGetNamepaces(): void
@@ -51,7 +45,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'test'])
+            CommandRunner::handle(['', 'tester'])
         );
     }
 
@@ -71,6 +65,20 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
+    public function testHasCommand(): void
+    {
+        $this->assertTrue(
+            CommandRunner::hasCommand('tester')
+        );
+    }
+
+    public function testHasCommandInvalid(): void
+    {
+        $this->assertFalse(
+            CommandRunner::hasCommand('invalid')
+        );
+    }
+
     public function testHasNamespace(): void
     {
         $this->assertTrue(
@@ -78,7 +86,7 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
-    public function testHasInvalid(): void
+    public function testHasNamespaceInvalid(): void
     {
         $this->assertFalse(
             CommandRunner::hasNamespace('Tests\Invalid')
@@ -107,15 +115,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::run('test')
-        );
-    }
-
-    public function testRunDeep(): void
-    {
-        $this->assertSame(
-            1,
-            CommandRunner::run('deep/another')
+            CommandRunner::run('tester')
         );
     }
 
