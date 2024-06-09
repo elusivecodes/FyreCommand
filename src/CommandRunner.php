@@ -19,6 +19,7 @@ use function class_exists;
 use function explode;
 use function implode;
 use function in_array;
+use function is_dir;
 use function is_subclass_of;
 use function lcfirst;
 use function pathinfo;
@@ -79,6 +80,10 @@ abstract class CommandRunner
                         $fullPath .= '/'.implode('/', $pathParts);
                     }
 
+                    if (!is_dir($fullPath)) {
+                        continue;
+                    }
+
                     static::$commands += static::findCommands($fullPath, $namespace);
                 }
 
@@ -123,14 +128,12 @@ abstract class CommandRunner
         $allCommands = static::all();
 
         $data = [];
-        foreach ($allCommands AS $commands) {
-            foreach ($commands AS $alias => $command) {
-                $data[] = [
-                    Console::style($alias, ['color' => Console::GREEN]),
-                    $command->getName(),
-                    $command->getDescription()
-                ];
-            }
+        foreach ($allCommands AS $alias => $command) {
+            $data[] = [
+                Console::style($alias, ['color' => Console::GREEN]),
+                $command->getName(),
+                $command->getDescription()
+            ];
         }
 
         Console::table($data, ['Command', 'Name', 'Description']);
@@ -210,6 +213,8 @@ abstract class CommandRunner
     protected static function findCommands(string $path, string $namespace): array
     {
         $files = array_diff(scandir($path), ['.', '..']);
+
+        $commands = [];
 
         foreach ($files AS $file) {
             if (!str_ends_with($file, 'Command.php')) {
