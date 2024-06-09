@@ -7,6 +7,7 @@ use Fyre\Console\Console;
 use Fyre\Loader\Loader;
 use ReflectionClass;
 
+use const SORT_NATURAL;
 use const PATHINFO_FILENAME;
 
 use function array_diff;
@@ -22,6 +23,7 @@ use function in_array;
 use function is_dir;
 use function is_subclass_of;
 use function lcfirst;
+use function ksort;
 use function pathinfo;
 use function preg_match;
 use function scandir;
@@ -63,7 +65,7 @@ abstract class CommandRunner
             return static::$commands;
         }
 
-        static::$commands = [];
+        $commands = [];
 
         foreach (static::$namespaces AS $namespace) {
             $pathParts = [];
@@ -84,14 +86,16 @@ abstract class CommandRunner
                         continue;
                     }
 
-                    static::$commands += static::findCommands($fullPath, $namespace);
+                    $commands += static::findCommands($fullPath, $namespace);
                 }
 
                 $pathParts[] = array_pop($namespaceParts);
             } while ($namespaceParts !== []);
         }
 
-        return static::$commands;
+        ksort($commands, SORT_NATURAL);
+
+        return static::$commands = $commands;
     }
 
     /**
