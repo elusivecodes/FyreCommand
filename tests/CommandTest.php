@@ -9,12 +9,11 @@ use Tests\Mock\TestCommand;
 
 final class CommandTest extends TestCase
 {
-
     public function testGetAlias(): void
     {
         $this->assertSame(
             'tester',
-            (new TestCommand)->getAlias()
+            (new TestCommand())->getAlias()
         );
     }
 
@@ -22,7 +21,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'arguments',
-            (new ArgumentsCommand)->getAlias()
+            (new ArgumentsCommand())->getAlias()
         );
     }
 
@@ -30,7 +29,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'This is a test command.',
-            (new TestCommand)->getDescription()
+            (new TestCommand())->getDescription()
         );
     }
 
@@ -38,7 +37,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Test Command',
-            (new TestCommand)->getName()
+            (new TestCommand())->getName()
         );
     }
 
@@ -46,8 +45,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Arguments',
-            (new ArgumentsCommand)->getName()
+            (new ArgumentsCommand())->getName()
         );
     }
-
 }

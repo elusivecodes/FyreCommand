@@ -12,7 +12,6 @@ use function array_keys;
 
 final class CommandRunnerTest extends TestCase
 {
-
     public function testAll(): void
     {
         $commands = CommandRunner::all();
@@ -21,12 +20,12 @@ final class CommandRunnerTest extends TestCase
             [
                 'arguments',
                 'options',
-                'tester'
+                'tester',
             ],
             array_keys($commands)
         );
 
-        foreach ($commands AS $command) {
+        foreach ($commands as $command) {
             $this->assertInstanceOf(Command::class, $command);
         }
     }
@@ -35,7 +34,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             [
-                '\Tests\Mock\\'
+                '\Tests\Mock\\',
             ],
             CommandRunner::getNamespaces()
         );
@@ -49,19 +48,19 @@ final class CommandRunnerTest extends TestCase
         );
     }
 
-    public function testHandleCommandArguments(): void
-    {
-        $this->assertSame(
-            0,
-            CommandRunner::handle(['', 'arguments', 'value'])
-        );
-    }
-
     public function testHandleCommandArgumentOpts(): void
     {
         $this->assertSame(
             0,
             CommandRunner::handle(['', 'options', '--test', 'value'])
+        );
+    }
+
+    public function testHandleCommandArguments(): void
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'arguments', 'value'])
         );
     }
 
@@ -133,9 +132,8 @@ final class CommandRunnerTest extends TestCase
         CommandRunner::clear();
 
         Loader::addNamespaces([
-            'Tests' => 'tests'
+            'Tests' => 'tests',
         ]);
         CommandRunner::addNamespace('Tests\Mock');
     }
-
 }

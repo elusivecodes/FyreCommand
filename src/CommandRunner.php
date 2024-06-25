@@ -7,9 +7,6 @@ use Fyre\Console\Console;
 use Fyre\Loader\Loader;
 use ReflectionClass;
 
-use const SORT_NATURAL;
-use const PATHINFO_FILENAME;
-
 use function array_diff;
 use function array_filter;
 use function array_key_exists;
@@ -22,8 +19,8 @@ use function implode;
 use function in_array;
 use function is_dir;
 use function is_subclass_of;
-use function lcfirst;
 use function ksort;
+use function lcfirst;
 use function pathinfo;
 use function preg_match;
 use function scandir;
@@ -32,18 +29,21 @@ use function str_replace;
 use function trim;
 use function ucwords;
 
+use const PATHINFO_FILENAME;
+use const SORT_NATURAL;
+
 /**
  * CommandRunner
  */
 abstract class CommandRunner
 {
+    protected static array|null $commands = null;
 
     protected static array $namespaces = [];
 
-    protected static array|null $commands = null;
-
     /**
      * Add a namespace for loading commands.
+     *
      * @param string $namespace The namespace.
      */
     public static function addNamespace(string $namespace): void
@@ -57,6 +57,7 @@ abstract class CommandRunner
 
     /**
      * Get all available commands.
+     *
      * @return array The available commands.
      */
     public static function all(): array
@@ -67,7 +68,7 @@ abstract class CommandRunner
 
         $commands = [];
 
-        foreach (static::$namespaces AS $namespace) {
+        foreach (static::$namespaces as $namespace) {
             $pathParts = [];
             $namespaceParts = explode('\\', $namespace);
             $namespaceParts = array_filter($namespaceParts);
@@ -76,7 +77,7 @@ abstract class CommandRunner
                 $currentNamespace = implode('\\', $namespaceParts).'\\';
                 $paths = Loader::getNamespacePaths($currentNamespace);
 
-                foreach ($paths AS $path) {
+                foreach ($paths as $path) {
                     $fullPath = $path;
                     if ($pathParts !== []) {
                         $fullPath .= '/'.implode('/', $pathParts);
@@ -109,6 +110,7 @@ abstract class CommandRunner
 
     /**
      * Get the namespaces.
+     *
      * @return array The namespaces.
      */
     public static function getNamespaces(): array
@@ -118,6 +120,7 @@ abstract class CommandRunner
 
     /**
      * Handle an argv command.
+     *
      * @param array $argv The CLI arguments.
      * @return int The exit code of the command.
      */
@@ -132,11 +135,11 @@ abstract class CommandRunner
         $allCommands = static::all();
 
         $data = [];
-        foreach ($allCommands AS $alias => $command) {
+        foreach ($allCommands as $alias => $command) {
             $data[] = [
                 Console::style($alias, ['color' => Console::GREEN]),
                 $command->getName(),
-                $command->getDescription()
+                $command->getDescription(),
             ];
         }
 
@@ -147,6 +150,7 @@ abstract class CommandRunner
 
     /**
      * Determine if a command exists.
+     *
      * @param string $alias The command alias.
      * @return bool TRUE if the command exists, otherwise FALSE.
      */
@@ -157,6 +161,7 @@ abstract class CommandRunner
 
     /**
      * Determine if a namespace exists.
+     *
      * @param string $namespace The namespace.
      * @return bool TRUE if the namespace exists, otherwise FALSE.
      */
@@ -169,6 +174,7 @@ abstract class CommandRunner
 
     /**
      * Remove a namespace.
+     *
      * @param string $namespace The namespace.
      * @return bool TRUE If the namespace was removed, otherwise FALSE.
      */
@@ -176,7 +182,7 @@ abstract class CommandRunner
     {
         $namespace = static::normalizeNamespace($namespace);
 
-        foreach (static::$namespaces AS $i => $otherNamespace) {
+        foreach (static::$namespaces as $i => $otherNamespace) {
             if ($otherNamespace !== $namespace) {
                 continue;
             }
@@ -191,6 +197,7 @@ abstract class CommandRunner
 
     /**
      * Run a command.
+     *
      * @param string $alias The command alias.
      * @param array $arguments The arguments.
      * @return int The exit code.
@@ -210,6 +217,7 @@ abstract class CommandRunner
 
     /**
      * Find commands in a Folder.
+     *
      * @param string $path The path.
      * @param string $namespace The root namespace.
      * @return array The commands.
@@ -220,7 +228,7 @@ abstract class CommandRunner
 
         $commands = [];
 
-        foreach ($files AS $file) {
+        foreach ($files as $file) {
             if (!str_ends_with($file, 'Command.php')) {
                 continue;
             }
@@ -239,7 +247,7 @@ abstract class CommandRunner
                 continue;
             }
 
-            $command = new $className;
+            $command = new $className();
 
             $alias = $command->getAlias();
 
@@ -251,6 +259,7 @@ abstract class CommandRunner
 
     /**
      * Normalize a namespace
+     *
      * @param string $namespace The namespace.
      * @return string The normalized namespace.
      */
@@ -265,6 +274,7 @@ abstract class CommandRunner
 
     /**
      * Parse the command and arguments from argv.
+     *
      * @param array $argv The CLI arguments.
      * @return array The command and arguments.
      */
@@ -277,7 +287,7 @@ abstract class CommandRunner
         $arguments = [];
 
         $key = null;
-        foreach ($argv AS $arg) {
+        foreach ($argv as $arg) {
             if (preg_match('/^--?(.*)$/', $arg, $match)) {
                 $key = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $match[1]))));
             } else if ($key !== null) {
@@ -290,5 +300,4 @@ abstract class CommandRunner
 
         return [$command, $arguments];
     }
-
 }

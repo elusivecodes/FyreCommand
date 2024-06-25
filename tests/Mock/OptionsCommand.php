@@ -9,12 +9,10 @@ use function array_key_exists;
 
 class OptionsCommand extends Command
 {
-
     public function run(array $arguments = []): int
     {
         return array_key_exists('test', $arguments) && $arguments['test'] === 'value' ?
             static::CODE_SUCCESS :
             static::CODE_ERROR;
     }
-
 }

@@ -12,19 +12,19 @@ use function preg_replace;
  */
 abstract class Command
 {
+    public const CODE_ERROR = 1;
 
     public const CODE_SUCCESS = 0;
 
-    public const CODE_ERROR = 1;
-
     protected string|null $alias = null;
-
-    protected string|null $name = null;
 
     protected string $description = '';
 
+    protected string|null $name = null;
+
     /**
      * Get the command alias.
+     *
      * @return string The command alias.
      */
     public function getAlias(): string
@@ -34,6 +34,7 @@ abstract class Command
 
     /**
      * Get the command description.
+     *
      * @return string The command description.
      */
     public function getDescription(): string
@@ -43,6 +44,7 @@ abstract class Command
 
     /**
      * Get the command name.
+     *
      * @return string The command name.
      */
     public function getName(): string
@@ -52,9 +54,9 @@ abstract class Command
 
     /**
      * Run the command.
+     *
      * @param array $arguments The command arguments.
      * @return mixed The exit code.
      */
     abstract public function run(array $arguments = []);
-
 }
