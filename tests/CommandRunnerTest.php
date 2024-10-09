@@ -19,6 +19,7 @@ final class CommandRunnerTest extends TestCase
         $this->assertSame(
             [
                 'arguments',
+                'booloptions',
                 'options',
                 'tester',
             ],
@@ -45,6 +46,22 @@ final class CommandRunnerTest extends TestCase
         $this->assertSame(
             0,
             CommandRunner::handle(['', 'tester'])
+        );
+    }
+
+    public function testHandleCommandArgumentBoolMultipleOpts(): void
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'booloptions', '--test', '--other', 'value'])
+        );
+    }
+
+    public function testHandleCommandArgumentBoolOpts(): void
+    {
+        $this->assertSame(
+            0,
+            CommandRunner::handle(['', 'booloptions', '--test'])
         );
     }
 

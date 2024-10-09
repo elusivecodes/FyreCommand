@@ -288,7 +288,11 @@ abstract class CommandRunner
 
         $key = null;
         foreach ($argv as $arg) {
-            if (preg_match('/^--?(.*)$/', $arg, $match)) {
+            if (preg_match('/^--?([^\s]+)$/', $arg, $match)) {
+                if ($key !== null) {
+                    $arguments[$key] = true;
+                }
+
                 $key = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $match[1]))));
             } else if ($key !== null) {
                 $arguments[$key] = $arg;
@@ -296,6 +300,10 @@ abstract class CommandRunner
             } else {
                 $arguments[] = $arg;
             }
+        }
+
+        if ($key !== null) {
+            $arguments[$key] = true;
         }
 
         return [$command, $arguments];
