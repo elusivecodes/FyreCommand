@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Fyre\Command;
 
+use Fyre\Console\Console;
 use ReflectionClass;
 
 use function preg_replace;
@@ -20,7 +21,18 @@ abstract class Command
 
     protected string $description = '';
 
+    protected Console $io;
+
     protected string|null $name = null;
+
+    /**
+     * New Command constructor
+     * .@param Console $io The Console.
+     */
+    public function __construct(Console $io)
+    {
+        $this->io = $io;
+    }
 
     /**
      * Get the command alias.

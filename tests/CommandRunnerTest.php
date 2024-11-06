@@ -5,6 +5,8 @@ namespace Tests;
 
 use Fyre\Command\Command;
 use Fyre\Command\CommandRunner;
+use Fyre\Console\Console;
+use Fyre\Container\Container;
 use Fyre\Loader\Loader;
 use PHPUnit\Framework\TestCase;
 
@@ -12,9 +14,11 @@ use function array_keys;
 
 final class CommandRunnerTest extends TestCase
 {
+    protected CommandRunner $runner;
+
     public function testAll(): void
     {
-        $commands = CommandRunner::all();
+        $commands = $this->runner->all();
 
         $this->assertSame(
             [
@@ -37,7 +41,7 @@ final class CommandRunnerTest extends TestCase
             [
                 '\Tests\Mock\\',
             ],
-            CommandRunner::getNamespaces()
+            $this->runner->getNamespaces()
         );
     }
 
@@ -45,7 +49,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'tester'])
+            $this->runner->handle(['', 'tester'])
         );
     }
 
@@ -53,7 +57,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'booloptions', '--test', '--other', 'value'])
+            $this->runner->handle(['', 'booloptions', '--test', '--other', 'value'])
         );
     }
 
@@ -61,7 +65,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'booloptions', '--test'])
+            $this->runner->handle(['', 'booloptions', '--test'])
         );
     }
 
@@ -69,7 +73,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'options', '--test', 'value'])
+            $this->runner->handle(['', 'options', '--test', 'value'])
         );
     }
 
@@ -77,53 +81,55 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::handle(['', 'arguments', 'value'])
+            $this->runner->handle(['', 'arguments', 'value'])
         );
     }
 
     public function testHasCommand(): void
     {
         $this->assertTrue(
-            CommandRunner::hasCommand('tester')
+            $this->runner->hasCommand('tester')
         );
     }
 
     public function testHasCommandInvalid(): void
     {
         $this->assertFalse(
-            CommandRunner::hasCommand('invalid')
+            $this->runner->hasCommand('invalid')
         );
     }
 
     public function testHasNamespace(): void
     {
         $this->assertTrue(
-            CommandRunner::hasNamespace('Tests\Mock')
+            $this->runner->hasNamespace('Tests\Mock')
         );
     }
 
     public function testHasNamespaceInvalid(): void
     {
         $this->assertFalse(
-            CommandRunner::hasNamespace('Tests\Invalid')
+            $this->runner->hasNamespace('Tests\Invalid')
         );
     }
 
     public function testRemoveNamespace(): void
     {
-        $this->assertTrue(
-            CommandRunner::removeNamespace('Tests\Mock')
+        $this->assertSame(
+            $this->runner,
+            $this->runner->removeNamespace('Tests\Mock')
         );
 
         $this->assertFalse(
-            CommandRunner::hasNamespace('Tests\Mock')
+            $this->runner->hasNamespace('Tests\Mock')
         );
     }
 
     public function testRemoveNamespaceInvalid(): void
     {
-        $this->assertFalse(
-            CommandRunner::removeNamespace('Tests\Invalid')
+        $this->assertSame(
+            $this->runner,
+            $this->runner->removeNamespace('Tests\Invalid')
         );
     }
 
@@ -131,7 +137,7 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::run('tester')
+            $this->runner->run('tester')
         );
     }
 
@@ -139,18 +145,24 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertSame(
             0,
-            CommandRunner::run('arguments', ['value'])
+            $this->runner->run('arguments', ['value'])
         );
     }
 
     protected function setUp(): void
     {
-        Loader::clear();
-        CommandRunner::clear();
+        $container = new Container();
+        $container->singleton(Loader::class);
+        $container->singleton(Console::class);
 
-        Loader::addNamespaces([
+        $container->use(Loader::class)->addNamespaces([
             'Tests' => 'tests',
         ]);
-        CommandRunner::addNamespace('Tests\Mock');
+
+        $this->runner = $container->build(CommandRunner::class, [
+            'namespaces' => [
+                'Tests\Mock',
+            ],
+        ]);
     }
 }

@@ -5,6 +5,7 @@
 
 ## Table Of Contents
 - [Installation](#installation)
+- [Basic Usage](#basic-usage)
 - [Methods](#methods)
 - [Commands](#commands)
 
@@ -25,6 +26,32 @@ use Fyre\Command\CommandRunner;
 ```
 
 
+## Basic Usage
+
+- `$container` is a  [*Container*](https://github.com/elusivecodes/FyreContainer).
+- `$loader` is a [*Loader*](https://github.com/elusivecodes/FyreLoader).
+- `$io` is a [*Console*](https://github.com/elusivecodes/FyreConsole).
+- `$namespaces` is an array containing the namespaces.
+
+```php
+$runner = new CommandRunner($container, $loader, $io, $namespaces);
+```
+
+**Autoloading**
+
+It is recommended to bind the *CommandRunner* to the [*Container*](https://github.com/elusivecodes/FyreContainer) as a singleton.
+
+```php
+$container->singleton(CommandRunner::class);
+```
+
+Any dependencies will be injected automatically when loading from the [*Container*](https://github.com/elusivecodes/FyreContainer).
+
+```php
+$runner = $container->use(CommandRunner::class);
+```
+
+
 ## Methods
 
 **Add Namespace**
@@ -34,7 +61,7 @@ Add a namespace for loading commands.
 - `$namespace` is a string representing the namespace.
 
 ```php
-CommandRunner::addNamespace($namespace);
+$runner->addNamespace($namespace);
 ```
 
 **All**
@@ -42,7 +69,7 @@ CommandRunner::addNamespace($namespace);
 Get all available commands.
 
 ```php
-$commands = CommandRunner::all();
+$commands = $runner->all();
 ```
 
 This method will return an array where the key is the command alias, and the value is an instance of the command.
@@ -52,7 +79,7 @@ This method will return an array where the key is the command alias, and the val
 Clear all namespaces and loaded commands.
 
 ```php
-CommandRunner::clear();
+$runner->clear();
 ```
 
 **Get Namespaces**
@@ -60,7 +87,7 @@ CommandRunner::clear();
 Get the namespaces.
 
 ```php
-$namespaces = CommandRunner::getNamespaces();
+$namespaces = $runner->getNamespaces();
 ```
 
 **Handle**
@@ -70,7 +97,7 @@ Handle an argv [*Command*](#commands).
 - `$argv` is an array containing the CLI arguments.
 
 ```php
-$code = CommandRunner::handle($argv);
+$code = $runner->handle($argv);
 ```
 
 **Has Command**
@@ -80,7 +107,7 @@ Check if a command exists.
 - `$alias` is a string representing the command alias.
 
 ```php
-$hasCommand = CommandRunner::hasCommand($alias);
+$hasCommand = $runner->hasCommand($alias);
 ```
 
 **Has Namespace**
@@ -90,7 +117,7 @@ Check if a namespace exists.
 - `$namespace` is a string representing the namespace.
 
 ```php
-$hasNamespace = CommandRunner::hasNamespace($namespace);
+$hasNamespace = $runner->hasNamespace($namespace);
 ```
 
 **Remove Namespace**
@@ -100,7 +127,7 @@ Remove a namespace.
 - `$namespace` is a string representing the namespace.
 
 ```php
-$removed = CommandRunner::removeNamespace($namespace);
+$runner->removeNamespace($namespace);
 ```
 
 **Run**
@@ -111,7 +138,7 @@ Run a [*Command*](#commands).
 - `$arguments` is an array containing arguments for the command, and will default to *[]*.
 
 ```php
-$code = CommandRunner::run($alias, $arguments);
+$code = $runner->run($alias, $arguments);
 ```
 
 

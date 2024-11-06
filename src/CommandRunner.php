@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Fyre\Command;
 
 use Fyre\Console\Console;
+use Fyre\Container\Container;
 use Fyre\Loader\Loader;
 use ReflectionClass;
 
@@ -35,24 +36,52 @@ use const SORT_NATURAL;
 /**
  * CommandRunner
  */
-abstract class CommandRunner
+class CommandRunner
 {
-    protected static array|null $commands = null;
+    protected array|null $commands = null;
 
-    protected static array $namespaces = [];
+    protected Container $container;
+
+    protected Console $io;
+
+    protected Loader $loader;
+
+    protected array $namespaces = [];
+
+    /**
+     * New CommandRunner constructor.
+     *
+     * @param Container $container The Container.
+     * @param Loader $loader The Loader.
+     * @param Console $io The Console.
+     * @param array $namespaces The namespaces.
+     */
+    public function __construct(Container $container, Loader $loader, Console $io, array $namespaces = [])
+    {
+        $this->container = $container;
+        $this->loader = $loader;
+        $this->io = $io;
+
+        foreach ($namespaces as $namespace) {
+            $this->addNamespace($namespace);
+        }
+    }
 
     /**
      * Add a namespace for loading commands.
      *
      * @param string $namespace The namespace.
+     * @return CommandRunner The CommandRunner.
      */
-    public static function addNamespace(string $namespace): void
+    public function addNamespace(string $namespace): static
     {
         $namespace = static::normalizeNamespace($namespace);
 
-        if (!in_array($namespace, static::$namespaces)) {
-            static::$namespaces[] = $namespace;
+        if (!in_array($namespace, $this->namespaces)) {
+            $this->namespaces[] = $namespace;
         }
+
+        return $this;
     }
 
     /**
@@ -60,22 +89,22 @@ abstract class CommandRunner
      *
      * @return array The available commands.
      */
-    public static function all(): array
+    public function all(): array
     {
-        if (static::$commands !== null) {
-            return static::$commands;
+        if ($this->commands !== null) {
+            return $this->commands;
         }
 
         $commands = [];
 
-        foreach (static::$namespaces as $namespace) {
+        foreach ($this->namespaces as $namespace) {
             $pathParts = [];
             $namespaceParts = explode('\\', $namespace);
             $namespaceParts = array_filter($namespaceParts);
 
             do {
                 $currentNamespace = implode('\\', $namespaceParts).'\\';
-                $paths = Loader::getNamespacePaths($currentNamespace);
+                $paths = $this->loader->getNamespacePaths($currentNamespace);
 
                 foreach ($paths as $path) {
                     $fullPath = $path;
@@ -87,7 +116,7 @@ abstract class CommandRunner
                         continue;
                     }
 
-                    $commands += static::findCommands($fullPath, $namespace);
+                    $commands += $this->findCommands($fullPath, $namespace);
                 }
 
                 $pathParts[] = array_pop($namespaceParts);
@@ -96,16 +125,16 @@ abstract class CommandRunner
 
         ksort($commands, SORT_NATURAL);
 
-        return static::$commands = $commands;
+        return $this->commands = $commands;
     }
 
     /**
      * Clear all namespaces and loaded commands.
      */
-    public static function clear(): void
+    public function clear(): void
     {
-        static::$namespaces = [];
-        static::$commands = null;
+        $this->namespaces = [];
+        $this->commands = null;
     }
 
     /**
@@ -113,9 +142,9 @@ abstract class CommandRunner
      *
      * @return array The namespaces.
      */
-    public static function getNamespaces(): array
+    public function getNamespaces(): array
     {
-        return static::$namespaces;
+        return $this->namespaces;
     }
 
     /**
@@ -124,15 +153,15 @@ abstract class CommandRunner
      * @param array $argv The CLI arguments.
      * @return int The exit code of the command.
      */
-    public static function handle(array $argv): int
+    public function handle(array $argv): int
     {
         [$command, $arguments] = static::parseArguments($argv);
 
         if ($command) {
-            return static::run($command, $arguments);
+            return $this->run($command, $arguments);
         }
 
-        $allCommands = static::all();
+        $allCommands = $this->all();
 
         $data = [];
         foreach ($allCommands as $alias => $command) {
@@ -143,7 +172,7 @@ abstract class CommandRunner
             ];
         }
 
-        Console::table($data, ['Command', 'Name', 'Description']);
+        $this->io->table($data, ['Command', 'Name', 'Description']);
 
         return Command::CODE_SUCCESS;
     }
@@ -154,9 +183,9 @@ abstract class CommandRunner
      * @param string $alias The command alias.
      * @return bool TRUE if the command exists, otherwise FALSE.
      */
-    public static function hasCommand(string $alias): bool
+    public function hasCommand(string $alias): bool
     {
-        return array_key_exists($alias, static::all());
+        return array_key_exists($alias, $this->all());
     }
 
     /**
@@ -165,34 +194,33 @@ abstract class CommandRunner
      * @param string $namespace The namespace.
      * @return bool TRUE if the namespace exists, otherwise FALSE.
      */
-    public static function hasNamespace(string $namespace): bool
+    public function hasNamespace(string $namespace): bool
     {
         $namespace = static::normalizeNamespace($namespace);
 
-        return in_array($namespace, static::$namespaces);
+        return in_array($namespace, $this->namespaces);
     }
 
     /**
      * Remove a namespace.
      *
      * @param string $namespace The namespace.
-     * @return bool TRUE If the namespace was removed, otherwise FALSE.
+     * @return CommandRunner The CommandRunner.
      */
-    public static function removeNamespace(string $namespace): bool
+    public function removeNamespace(string $namespace): static
     {
         $namespace = static::normalizeNamespace($namespace);
 
-        foreach (static::$namespaces as $i => $otherNamespace) {
+        foreach ($this->namespaces as $i => $otherNamespace) {
             if ($otherNamespace !== $namespace) {
                 continue;
             }
 
-            array_splice(static::$namespaces, $i, 1);
-
-            return true;
+            array_splice($this->namespaces, $i, 1);
+            break;
         }
 
-        return false;
+        return $this;
     }
 
     /**
@@ -202,15 +230,15 @@ abstract class CommandRunner
      * @param array $arguments The arguments.
      * @return int The exit code.
      */
-    public static function run(string $alias, array $arguments = []): int
+    public function run(string $alias, array $arguments = []): int
     {
-        $commands = static::all();
+        $commands = $this->all();
 
         if (array_key_exists($alias, $commands)) {
             return $commands[$alias]->run($arguments) ?? Command::CODE_SUCCESS;
         }
 
-        Console::error('Invalid command: '.$alias);
+        $this->io->error('Invalid command: '.$alias);
 
         return Command::CODE_ERROR;
     }
@@ -222,7 +250,7 @@ abstract class CommandRunner
      * @param string $namespace The root namespace.
      * @return array The commands.
      */
-    protected static function findCommands(string $path, string $namespace): array
+    protected function findCommands(string $path, string $namespace): array
     {
         $files = array_diff(scandir($path), ['.', '..']);
 
@@ -247,7 +275,7 @@ abstract class CommandRunner
                 continue;
             }
 
-            $command = new $className();
+            $command = $this->container->build($className);
 
             $alias = $command->getAlias();
 

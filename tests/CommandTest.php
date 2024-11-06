@@ -3,17 +3,22 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Fyre\Console\Console;
+use Fyre\Container\Container;
+use Fyre\Loader\Loader;
 use PHPUnit\Framework\TestCase;
 use Tests\Mock\ArgumentsCommand;
 use Tests\Mock\TestCommand;
 
 final class CommandTest extends TestCase
 {
+    protected Container $container;
+
     public function testGetAlias(): void
     {
         $this->assertSame(
             'tester',
-            (new TestCommand())->getAlias()
+            $this->container->build(TestCommand::class)->getAlias()
         );
     }
 
@@ -21,7 +26,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'arguments',
-            (new ArgumentsCommand())->getAlias()
+            $this->container->build(ArgumentsCommand::class)->getAlias()
         );
     }
 
@@ -29,7 +34,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'This is a test command.',
-            (new TestCommand())->getDescription()
+            $this->container->build(TestCommand::class)->getDescription()
         );
     }
 
@@ -37,7 +42,7 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Test Command',
-            (new TestCommand())->getName()
+            $this->container->build(TestCommand::class)->getName()
         );
     }
 
@@ -45,7 +50,13 @@ final class CommandTest extends TestCase
     {
         $this->assertSame(
             'Arguments',
-            (new ArgumentsCommand())->getName()
+            $this->container->build(ArgumentsCommand::class)->getName()
         );
+    }
+
+    protected function setUp(): void
+    {
+        $this->container = new Container();
+        $this->container->singleton(Console::class);
     }
 }
