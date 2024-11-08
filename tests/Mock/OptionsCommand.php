@@ -5,13 +5,24 @@ namespace Tests\Mock;
 
 use Fyre\Command\Command;
 
-use function array_key_exists;
-
 class OptionsCommand extends Command
 {
-    public function run(array $arguments = []): int
+    protected array $options = [
+        'value' => [
+            'text' => 'Which do you want?',
+            'values' => [
+                'a',
+                'b',
+                'c',
+            ],
+            'required' => true,
+            'default' => 'a',
+        ],
+    ];
+
+    public function run(string $value): int
     {
-        return array_key_exists('test', $arguments) && $arguments['test'] === 'value' ?
+        return $value === 'a' ?
             static::CODE_SUCCESS :
             static::CODE_ERROR;
     }

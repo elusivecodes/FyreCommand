@@ -3,11 +3,6 @@ declare(strict_types=1);
 
 namespace Fyre\Command;
 
-use Fyre\Console\Console;
-use ReflectionClass;
-
-use function preg_replace;
-
 /**
  * Command
  */
@@ -21,54 +16,5 @@ abstract class Command
 
     protected string $description = '';
 
-    protected Console $io;
-
-    protected string|null $name = null;
-
-    /**
-     * New Command constructor
-     * .@param Console $io The Console.
-     */
-    public function __construct(Console $io)
-    {
-        $this->io = $io;
-    }
-
-    /**
-     * Get the command alias.
-     *
-     * @return string The command alias.
-     */
-    public function getAlias(): string
-    {
-        return $this->alias ??= strtolower($this->getName());
-    }
-
-    /**
-     * Get the command description.
-     *
-     * @return string The command description.
-     */
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    /**
-     * Get the command name.
-     *
-     * @return string The command name.
-     */
-    public function getName(): string
-    {
-        return $this->name ??= preg_replace('/Command$/', '', (new ReflectionClass($this))->getShortName());
-    }
-
-    /**
-     * Run the command.
-     *
-     * @param array $arguments The command arguments.
-     * @return mixed The exit code.
-     */
-    abstract public function run(array $arguments = []);
+    protected array $options = [];
 }

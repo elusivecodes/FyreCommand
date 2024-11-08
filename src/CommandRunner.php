@@ -6,11 +6,16 @@ namespace Fyre\Command;
 use Fyre\Console\Console;
 use Fyre\Container\Container;
 use Fyre\Loader\Loader;
+use Fyre\Utility\Inflector;
 use ReflectionClass;
 
 use function array_diff;
+use function array_diff_key;
 use function array_filter;
+use function array_intersect_key;
+use function array_is_list;
 use function array_key_exists;
+use function array_keys;
 use function array_pop;
 use function array_shift;
 use function array_splice;
@@ -18,17 +23,17 @@ use function class_exists;
 use function explode;
 use function implode;
 use function in_array;
+use function is_array;
+use function is_bool;
 use function is_dir;
 use function is_subclass_of;
 use function ksort;
-use function lcfirst;
 use function pathinfo;
 use function preg_match;
+use function preg_replace;
 use function scandir;
 use function str_ends_with;
-use function str_replace;
 use function trim;
-use function ucwords;
 
 use const PATHINFO_FILENAME;
 use const SORT_NATURAL;
@@ -42,6 +47,8 @@ class CommandRunner
 
     protected Container $container;
 
+    protected Inflector $inflector;
+
     protected Console $io;
 
     protected Loader $loader;
@@ -53,13 +60,15 @@ class CommandRunner
      *
      * @param Container $container The Container.
      * @param Loader $loader The Loader.
+     * @param Inflector $inflector The Inflector.
      * @param Console $io The Console.
      * @param array $namespaces The namespaces.
      */
-    public function __construct(Container $container, Loader $loader, Console $io, array $namespaces = [])
+    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, array $namespaces = [])
     {
         $this->container = $container;
         $this->loader = $loader;
+        $this->inflector = $inflector;
         $this->io = $io;
 
         foreach ($namespaces as $namespace) {
@@ -155,7 +164,7 @@ class CommandRunner
      */
     public function handle(array $argv): int
     {
-        [$command, $arguments] = static::parseArguments($argv);
+        [$command, $arguments] = $this->parseArguments($argv);
 
         if ($command) {
             return $this->run($command, $arguments);
@@ -167,12 +176,12 @@ class CommandRunner
         foreach ($allCommands as $alias => $command) {
             $data[] = [
                 Console::style($alias, ['color' => Console::GREEN]),
-                $command->getName(),
-                $command->getDescription(),
+                $command['description'],
+                implode(', ', array_keys($command['options'])),
             ];
         }
 
-        $this->io->table($data, ['Command', 'Name', 'Description']);
+        $this->io->table($data, ['Command', 'Description', 'Options']);
 
         return Command::CODE_SUCCESS;
     }
@@ -233,14 +242,94 @@ class CommandRunner
     public function run(string $alias, array $arguments = []): int
     {
         $commands = $this->all();
+        $command = $commands[$alias] ?? null;
 
-        if (array_key_exists($alias, $commands)) {
-            return $commands[$alias]->run($arguments) ?? Command::CODE_SUCCESS;
+        if (!$command) {
+            $this->io->error('Invalid command: '.$alias);
+
+            return Command::CODE_ERROR;
         }
 
-        $this->io->error('Invalid command: '.$alias);
+        $parsedOptions = [];
 
-        return Command::CODE_ERROR;
+        $namedArguments = array_intersect_key($arguments, $command['options']);
+        $listArguments = array_diff_key($arguments, $command['options']);
+
+        foreach ($command['options'] as $key => $data) {
+            if (array_key_exists($key, $namedArguments)) {
+                $value = $namedArguments[$key];
+            } else if ($listArguments !== []) {
+                $value = array_shift($listArguments);
+            } else {
+                $value = null;
+            }
+
+            if (!is_array($data)) {
+                $data = ['text' => (string) $data];
+            }
+
+            $data['text'] ??= '';
+            $data['values'] ??= null;
+            $data['boolean'] ??= false;
+            $data['required'] ??= false;
+            $data['default'] ??= null;
+
+            if (is_array($data['values'])) {
+                $optionKeys = array_is_list($data['values']) ?
+                    $data['values'] :
+                    array_keys($data['values']);
+
+                if ($value !== null && !in_array($value, $optionKeys)) {
+                    $this->io->error('Invalid option value for: '.$key);
+                    $value = null;
+                }
+
+                if ($data['required']) {
+                    while ($value === null) {
+                        $value = $this->io->choice($data['text'], $data['values'], $data['default']);
+                    }
+                } else {
+                    $value ??= $data['default'];
+                }
+            } else if ($data['boolean']) {
+                if ($value === null) {
+                    if ($data['required']) {
+                        $value = $this->io->confirm($data['text'], (bool) ($data['default'] ?? true));
+                    } else {
+                        $value = $data['default'];
+                    }
+                } else {
+                    $value = !in_array($value, [false, '0', 'n', 'no'], true);
+                }
+            } else {
+                if (is_bool($value)) {
+                    $this->io->error('Invalid value for: '.$key);
+                    $value = null;
+                }
+
+                if ($value === null) {
+                    if ($data['required']) {
+                        $text = $data['text'];
+
+                        if ($data['default']) {
+                            $text .= ' ('.$data['default'].')';
+                        }
+
+                        while ($value === null) {
+                            $value = $this->io->prompt($text) ?: $data['default'];
+                        }
+                    } else {
+                        $value = $data['default'];
+                    }
+                }
+            }
+
+            $parsedOptions[$key] = $value;
+        }
+
+        $instance = $this->container->build($command['className']);
+
+        return $this->container->call([$instance, 'run'], $parsedOptions) ?? Command::CODE_SUCCESS;
     }
 
     /**
@@ -275,29 +364,21 @@ class CommandRunner
                 continue;
             }
 
-            $command = $this->container->build($className);
+            $alias = $reflection->getProperty('alias')->getDefaultValue();
 
-            $alias = $command->getAlias();
+            if (!$alias) {
+                $alias = preg_replace('/Command$/', '', $reflection->getShortName());
+                $alias = $this->inflector->underscore($alias);
+            }
 
-            $commands[$alias] = $command;
+            $commands[$alias] = [
+                'description' => $reflection->getProperty('description')->getDefaultValue(),
+                'options' => $reflection->getProperty('options')->getDefaultValue(),
+                'className' => $className,
+            ];
         }
 
         return $commands;
-    }
-
-    /**
-     * Normalize a namespace
-     *
-     * @param string $namespace The namespace.
-     * @return string The normalized namespace.
-     */
-    protected static function normalizeNamespace(string $namespace): string
-    {
-        $namespace = trim($namespace, '\\');
-
-        return $namespace ?
-            '\\'.$namespace.'\\' :
-            '\\';
     }
 
     /**
@@ -306,7 +387,7 @@ class CommandRunner
      * @param array $argv The CLI arguments.
      * @return array The command and arguments.
      */
-    protected static function parseArguments(array $argv): array
+    protected function parseArguments(array $argv): array
     {
         array_shift($argv);
 
@@ -321,7 +402,7 @@ class CommandRunner
                     $arguments[$key] = true;
                 }
 
-                $key = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $match[1]))));
+                $key = $this->inflector->variable($match[1]);
             } else if ($key !== null) {
                 $arguments[$key] = $arg;
                 $key = null;
@@ -335,5 +416,16 @@ class CommandRunner
         }
 
         return [$command, $arguments];
+    }
+
+    /**
+     * Normalize a namespace
+     *
+     * @param string $namespace The namespace.
+     * @return string The normalized namespace.
+     */
+    protected static function normalizeNamespace(string $namespace): string
+    {
+        return trim($namespace, '\\').'\\';
     }
 }

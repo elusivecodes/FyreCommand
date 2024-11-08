@@ -8,6 +8,8 @@
 - [Basic Usage](#basic-usage)
 - [Methods](#methods)
 - [Commands](#commands)
+    - [Aliases](#aliases)
+    - [Options](#options)
 
 
 
@@ -28,13 +30,14 @@ use Fyre\Command\CommandRunner;
 
 ## Basic Usage
 
-- `$container` is a  [*Container*](https://github.com/elusivecodes/FyreContainer).
+- `$container` is a [*Container*](https://github.com/elusivecodes/FyreContainer).
+- `$inflector` is an [*Inflector*](https://github.com/elusivecodes/FyreInflector).
 - `$loader` is a [*Loader*](https://github.com/elusivecodes/FyreLoader).
 - `$io` is a [*Console*](https://github.com/elusivecodes/FyreConsole).
 - `$namespaces` is an array containing the namespaces.
 
 ```php
-$runner = new CommandRunner($container, $loader, $io, $namespaces);
+$runner = new CommandRunner($container, $inflector, $loader, $io, $namespaces);
 ```
 
 **Autoloading**
@@ -71,8 +74,6 @@ Get all available commands.
 ```php
 $commands = $runner->all();
 ```
-
-This method will return an array where the key is the command alias, and the value is an instance of the command.
 
 **Clear**
 
@@ -141,49 +142,53 @@ Run a [*Command*](#commands).
 $code = $runner->run($alias, $arguments);
 ```
 
+Command [options](#options) will be parsed from the provided arguments.
+
 
 ## Commands
 
-Custom commands can be created by extending `\Fyre\Command\Command`, suffixing the class name with "*Command*", and ensuring the `run` method is implemented.
+Custom commands can be created by extending `\Fyre\Command\Command`, suffixing the class name with "*Command*", and ensuring a `run` method is implemented.
 
-**Alias**
+Any dependencies will be resolved automatically from the [*Container*](https://github.com/elusivecodes/FyreContainer).
 
-Get the command alias.
+The `run` method should return an integer representing the command exit code. The class constants `Command::CODE_SUCCESS` and `Command::CODE_ERROR` can be used.
 
-```php
-$alias = $command->getAlias();
-```
+### Aliases
 
-The alias can be set by defining the `$alias` property on the command, otherwise the class name will be used by default.
+You can define `$alias` and `$description` properties on the command. If no `$alias` is a provided, the command class name will be used (converted to snake_case).
 
-**Get Description**
+### Options
 
-Get the command description.
+You can also define an `$options` array on your custom commands, which will be used by the *CommandRunner* to parse the arguments and prompt for input if required.
 
-```php
-$description = $command->getDescription();
-```
-
-The description can be set by defining the `$description` property on the command.
-
-**Get Name**
-
-Get the command name.
+- `prompt` is a string representing the prompt text, and will default to "".
+- `values` is an array containing the values, and will default to *null*.
+- `boolean` is a boolean indicating whether the option is a boolean value, and will default to *false*.
+- `required` is a boolean indicating whether a value must be provided, and will default to *false*.
+- `default` is the default value, and will default to *true*.
 
 ```php
-$name = $command->getName();
+protected array $options = [
+    'name' => [
+        'prompt' => 'What is your name?',
+        'required' => true,
+    ],
+    'color' => [
+        'prompt' => 'What is your favorite color?',
+        'values' => [
+            'red',
+            'green',
+            'blue',
+        ],
+    ],
+    'confirmed' => [
+        'prompt' => 'Do you want to continue?',
+        'boolean' => true,
+        'required' => true,
+    ],
+];
+
+public function run(string $name, string|null $color, bool $confirmed): int;
 ```
 
-The name can be set by defining the `$name` property on the command, otherwise the class name will be used by default.
-
-**Run**
-
-Run the command.
-
-- `$arguments` is an array containing the command arguments.
-
-```php
-$code = $command->run($arguments);
-```
-
-This method should return an integer representing the command exit code. The class constants `Command::CODE_SUCCESS` and `Command::CODE_ERROR` can be used.
+If an option is marked as `required` and not provided as an argument, the *CommandRunner* will prompt for the value, otherwise the `default` value will be used.

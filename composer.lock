@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1881244464b6e3c7ce089105e76279b",
+    "content-hash": "b12450447b2d683c71f3f854cc6732a7",
     "packages": [
         {
             "name": "fyre/console",
@@ -89,6 +89,48 @@
                 "source": "https://github.com/elusivecodes/FyreContainer/tree/v1.0.2"
             },
             "time": "2024-11-02T02:28:03+00:00"
+        },
+        {
+            "name": "fyre/inflector",
+            "version": "v3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/elusivecodes/FyreInflector.git",
+                "reference": "b52c64a930ef6b793b5f416f2cec867d19db27f5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/elusivecodes/FyreInflector/zipball/b52c64a930ef6b793b5f416f2cec867d19db27f5",
+                "reference": "b52c64a930ef6b793b5f416f2cec867d19db27f5",
+                "shasum": ""
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.59",
+                "fyre/php-cs-fixer-config": "^1.0",
+                "phpunit/phpunit": "^11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Fyre\\Utility\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "elusivecodes",
+                    "email": "elusivecodes@gmail.com"
+                }
+            ],
+            "description": "An inflection library.",
+            "support": {
+                "issues": "https://github.com/elusivecodes/FyreInflector/issues",
+                "source": "https://github.com/elusivecodes/FyreInflector/tree/v3.0"
+            },
+            "time": "2024-11-01T04:06:16+00:00"
         },
         {
             "name": "fyre/loader",

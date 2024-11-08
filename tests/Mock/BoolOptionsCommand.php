@@ -5,13 +5,19 @@ namespace Tests\Mock;
 
 use Fyre\Command\Command;
 
-use function array_key_exists;
-
 class BoolOptionsCommand extends Command
 {
-    public function run(array $arguments = []): int
+    protected array $options = [
+        'test' => [
+            'text' => 'Do you agree?',
+            'boolean' => true,
+            'required' => true,
+        ],
+    ];
+
+    public function run(bool $test): int
     {
-        return array_key_exists('test', $arguments) && $arguments['test'] === true ?
+        return $test === true ?
             static::CODE_SUCCESS :
             static::CODE_ERROR;
     }

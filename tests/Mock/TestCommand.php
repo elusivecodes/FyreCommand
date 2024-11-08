@@ -11,7 +11,5 @@ class TestCommand extends Command
 
     protected string $description = 'This is a test command.';
 
-    protected string|null $name = 'Test Command';
-
-    public function run(array $arguments = []): void {}
+    public function run(): void {}
 }
