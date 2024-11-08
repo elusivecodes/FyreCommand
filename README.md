@@ -103,7 +103,7 @@ $code = $runner->handle($argv);
 
 **Has Command**
 
-Check if a command exists.
+Determine whether a command exists.
 
 - `$alias` is a string representing the command alias.
 
@@ -113,7 +113,7 @@ $hasCommand = $runner->hasCommand($alias);
 
 **Has Namespace**
 
-Check if a namespace exists.
+Determine whether a namespace exists.
 
 - `$namespace` is a string representing the namespace.
 

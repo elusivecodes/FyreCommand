@@ -187,7 +187,7 @@ class CommandRunner
     }
 
     /**
-     * Determine if a command exists.
+     * Determine whether a command exists.
      *
      * @param string $alias The command alias.
      * @return bool TRUE if the command exists, otherwise FALSE.
@@ -198,7 +198,7 @@ class CommandRunner
     }
 
     /**
-     * Determine if a namespace exists.
+     * Determine whether a namespace exists.
      *
      * @param string $namespace The namespace.
      * @return bool TRUE if the namespace exists, otherwise FALSE.
