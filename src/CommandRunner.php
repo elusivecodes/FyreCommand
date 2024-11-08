@@ -28,6 +28,7 @@ use function is_bool;
 use function is_dir;
 use function is_subclass_of;
 use function ksort;
+use function method_exists;
 use function pathinfo;
 use function preg_match;
 use function preg_replace;
@@ -250,6 +251,12 @@ class CommandRunner
             return Command::CODE_ERROR;
         }
 
+        if (!method_exists($command['className'], 'run')) {
+            $this->io->error('Missing run method: '.$alias);
+
+            return Command::CODE_ERROR;
+        }
+
         $parsedOptions = [];
 
         $namedArguments = array_intersect_key($arguments, $command['options']);
@@ -324,7 +331,9 @@ class CommandRunner
                 }
             }
 
-            $parsedOptions[$key] = $value;
+            if ($value !== null) {
+                $parsedOptions[$key] = $value;
+            }
         }
 
         $instance = $this->container->build($command['className']);
