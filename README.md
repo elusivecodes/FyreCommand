@@ -34,10 +34,9 @@ use Fyre\Command\CommandRunner;
 - `$inflector` is an [*Inflector*](https://github.com/elusivecodes/FyreInflector).
 - `$loader` is a [*Loader*](https://github.com/elusivecodes/FyreLoader).
 - `$io` is a [*Console*](https://github.com/elusivecodes/FyreConsole).
-- `$namespaces` is an array containing the namespaces.
 
 ```php
-$runner = new CommandRunner($container, $inflector, $loader, $io, $namespaces);
+$runner = new CommandRunner($container, $inflector, $loader, $io);
 ```
 
 **Autoloading**

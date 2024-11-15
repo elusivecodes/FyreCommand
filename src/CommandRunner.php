@@ -63,18 +63,13 @@ class CommandRunner
      * @param Loader $loader The Loader.
      * @param Inflector $inflector The Inflector.
      * @param Console $io The Console.
-     * @param array $namespaces The namespaces.
      */
-    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, array $namespaces = [])
+    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io)
     {
         $this->container = $container;
         $this->loader = $loader;
         $this->inflector = $inflector;
         $this->io = $io;
-
-        foreach ($namespaces as $namespace) {
-            $this->addNamespace($namespace);
-        }
     }
 
     /**

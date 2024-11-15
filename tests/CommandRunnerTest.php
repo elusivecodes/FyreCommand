@@ -335,11 +335,8 @@ final class CommandRunnerTest extends TestCase
             'Tests' => 'tests',
         ]);
 
-        $this->runner = $container->build(CommandRunner::class, [
-            'namespaces' => [
-                'Tests\Mock',
-            ],
-        ]);
+        $this->runner = $container->build(CommandRunner::class);
+        $this->runner->addNamespace('Tests\Mock');
     }
 
     protected function tearDown(): void
