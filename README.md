@@ -34,9 +34,10 @@ use Fyre\Command\CommandRunner;
 - `$inflector` is an [*Inflector*](https://github.com/elusivecodes/FyreInflector).
 - `$loader` is a [*Loader*](https://github.com/elusivecodes/FyreLoader).
 - `$io` is a [*Console*](https://github.com/elusivecodes/FyreConsole).
+- `$eventManager` is an [*EventManager*](https://github.com/elusivecodes/FyreEvent).
 
 ```php
-$runner = new CommandRunner($container, $inflector, $loader, $io);
+$runner = new CommandRunner($container, $inflector, $loader, $io, $eventManager);
 ```
 
 **Autoloading**
