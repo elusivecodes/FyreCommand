@@ -5,6 +5,8 @@ namespace Fyre\Command;
 
 use Fyre\Console\Console;
 use Fyre\Container\Container;
+use Fyre\Event\EventDispatcherTrait;
+use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
 use Fyre\Utility\Inflector;
 use ReflectionClass;
@@ -44,6 +46,8 @@ use const SORT_NATURAL;
  */
 class CommandRunner
 {
+    use EventDispatcherTrait;
+
     protected array|null $commands = null;
 
     protected Container $container;
@@ -63,13 +67,15 @@ class CommandRunner
      * @param Loader $loader The Loader.
      * @param Inflector $inflector The Inflector.
      * @param Console $io The Console.
+     * @param EventManager $eventManager The EventManager.
      */
-    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io)
+    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, EventManager $eventManager)
     {
         $this->container = $container;
         $this->loader = $loader;
         $this->inflector = $inflector;
         $this->io = $io;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -129,6 +135,8 @@ class CommandRunner
         }
 
         ksort($commands, SORT_NATURAL);
+
+        $this->dispatchEvent('Command.buildCommands', ['commands' => $commands]);
 
         return $this->commands = $commands;
     }
@@ -252,7 +260,7 @@ class CommandRunner
             return Command::CODE_ERROR;
         }
 
-        $parsedOptions = [];
+        $options = [];
 
         $namedArguments = array_intersect_key($arguments, $command['options']);
         $listArguments = array_diff_key($arguments, $command['options']);
@@ -327,13 +335,19 @@ class CommandRunner
             }
 
             if ($value !== null) {
-                $parsedOptions[$key] = $value;
+                $options[$key] = $value;
             }
         }
 
         $instance = $this->container->build($command['className']);
 
-        return $this->container->call([$instance, 'run'], $parsedOptions) ?? Command::CODE_SUCCESS;
+        $this->dispatchEvent('Command.beforeExecute', ['options' => $options], $instance);
+
+        $result = $this->container->call([$instance, 'run'], $options) ?? Command::CODE_SUCCESS;
+
+        $this->dispatchEvent('Command.afterExecute', ['options' => $options, 'result' => $result], $instance);
+
+        return $result;
     }
 
     /**

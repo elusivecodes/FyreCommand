@@ -22,6 +22,7 @@
     "require": {
         "fyre/console": "^4.0",
         "fyre/container": "^1.0",
+        "fyre/event": "^4.0",
         "fyre/inflector": "^3.0",
         "fyre/loader": "^3.0"
     },

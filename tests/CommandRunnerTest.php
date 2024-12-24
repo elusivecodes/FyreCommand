@@ -6,6 +6,8 @@ namespace Tests;
 use Fyre\Command\CommandRunner;
 use Fyre\Console\Console;
 use Fyre\Container\Container;
+use Fyre\Event\Event;
+use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
 use Fyre\Utility\Inflector;
 use PHPUnit\Framework\TestCase;
@@ -82,6 +84,52 @@ final class CommandRunnerTest extends TestCase
             ],
             $commands
         );
+    }
+
+    public function testEventAfterExecute(): void
+    {
+        $ran = false;
+        $this->runner->getEventManager()->on('Command.afterExecute', function(Event $event, array $options, int $result) use (&$ran): void {
+            $ran = true;
+
+            $this->assertSame([
+                'value' => 'value',
+            ], $options);
+
+            $this->assertSame(0, $result);
+        });
+
+        $this->runner->run('arguments', ['value']);
+
+        $this->assertTrue($ran);
+    }
+
+    public function testEventBeforeExecute(): void
+    {
+        $ran = false;
+        $this->runner->getEventManager()->on('Command.beforeExecute', function(Event $event, array $options) use (&$ran): void {
+            $ran = true;
+
+            $this->assertSame([
+                'value' => 'value',
+            ], $options);
+        });
+
+        $this->runner->run('arguments', ['value']);
+
+        $this->assertTrue($ran);
+    }
+
+    public function testEventBuildCommands(): void
+    {
+        $ran = false;
+        $this->runner->getEventManager()->on('Command.buildCommands', function(Event $event, array $commands) use (&$ran): void {
+            $ran = true;
+        });
+
+        $commands = $this->runner->all();
+
+        $this->assertTrue($ran);
     }
 
     public function testGetNamepaces(): void
@@ -330,6 +378,7 @@ final class CommandRunnerTest extends TestCase
         $container->singleton(Loader::class);
         $container->singleton(Inflector::class);
         $container->instance(Console::class, $console);
+        $container->singleton(EventManager::class, fn(): EventManager => new EventManager());
 
         $container->use(Loader::class)->addNamespaces([
             'Tests' => 'tests',
