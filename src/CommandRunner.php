@@ -136,7 +136,7 @@ class CommandRunner
 
         ksort($commands, SORT_NATURAL);
 
-        $this->dispatchEvent('Command.buildCommands', ['commands' => $commands]);
+        $this->dispatchEvent('Command.buildCommands', ['commands' => $commands], false);
 
         return $this->commands = $commands;
     }
@@ -341,11 +341,11 @@ class CommandRunner
 
         $instance = $this->container->build($command['className']);
 
-        $this->dispatchEvent('Command.beforeExecute', ['options' => $options], $instance);
+        $this->dispatchEvent('Command.beforeExecute', ['options' => $options], false, $instance);
 
         $result = $this->container->call([$instance, 'run'], $options) ?? Command::CODE_SUCCESS;
 
-        $this->dispatchEvent('Command.afterExecute', ['options' => $options, 'result' => $result], $instance);
+        $this->dispatchEvent('Command.afterExecute', ['options' => $options, 'result' => $result], false, $instance);
 
         return $result;
     }
