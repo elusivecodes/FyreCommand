@@ -378,7 +378,7 @@ final class CommandRunnerTest extends TestCase
         $container->singleton(Loader::class);
         $container->singleton(Inflector::class);
         $container->instance(Console::class, $console);
-        $container->singleton(EventManager::class, fn(): EventManager => new EventManager());
+        $container->singleton(EventManager::class);
 
         $container->use(Loader::class)->addNamespaces([
             'Tests' => 'tests',
