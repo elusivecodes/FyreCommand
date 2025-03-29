@@ -35,9 +35,10 @@ use Fyre\Command\CommandRunner;
 - `$loader` is a [*Loader*](https://github.com/elusivecodes/FyreLoader).
 - `$io` is a [*Console*](https://github.com/elusivecodes/FyreConsole).
 - `$eventManager` is an [*EventManager*](https://github.com/elusivecodes/FyreEvent).
+- `$typeParser` is an [*TypeParser*](https://github.com/elusivecodes/FyreTypeParser).
 
 ```php
-$runner = new CommandRunner($container, $inflector, $loader, $io, $eventManager);
+$runner = new CommandRunner($container, $inflector, $loader, $io, $eventManager, $typeParser);
 ```
 
 **Autoloading**
@@ -163,8 +164,8 @@ You can also define an `$options` array on your custom commands, which will be u
 
 - `prompt` is a string representing the prompt text, and will default to "".
 - `values` is an array containing the values, and will default to *null*.
-- `boolean` is a boolean indicating whether the option is a boolean value, and will default to *false*.
 - `required` is a boolean indicating whether a value must be provided, and will default to *false*.
+- `as` is a string representing the value type, and will default to *null*.
 - `default` is the default value, and will default to *true*.
 
 ```php
@@ -183,7 +184,7 @@ protected array $options = [
     ],
     'confirmed' => [
         'prompt' => 'Do you want to continue?',
-        'boolean' => true,
+        'as' => 'boolean',
         'required' => true,
     ],
 ];

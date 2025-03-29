@@ -6,6 +6,7 @@ namespace Tests;
 use Fyre\Command\CommandRunner;
 use Fyre\Console\Console;
 use Fyre\Container\Container;
+use Fyre\DateTime\DateTime;
 use Fyre\Event\Event;
 use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
@@ -15,6 +16,7 @@ use Tests\Mock\ArgumentsCommand;
 use Tests\Mock\BoolOptionsCommand;
 use Tests\Mock\OptionsCommand;
 use Tests\Mock\TestCommand;
+use Tests\Mock\TypeOptionsCommand;
 
 use function file_get_contents;
 use function file_put_contents;
@@ -54,7 +56,7 @@ final class CommandRunnerTest extends TestCase
                     'options' => [
                         'test' => [
                             'text' => 'Do you agree?',
-                            'boolean' => true,
+                            'as' => 'boolean',
                             'required' => true,
                         ],
                     ],
@@ -80,6 +82,17 @@ final class CommandRunnerTest extends TestCase
                     'description' => 'This is a test command.',
                     'options' => [],
                     'className' => TestCommand::class,
+                ],
+                'type_options' => [
+                    'description' => '',
+                    'options' => [
+                        'test' => [
+                            'text' => 'What is the date?',
+                            'as' => 'date',
+                            'required' => true,
+                        ],
+                    ],
+                    'className' => TypeOptionsCommand::class,
                 ],
             ],
             $commands
@@ -203,6 +216,16 @@ final class CommandRunnerTest extends TestCase
         $this->assertSame(
             0,
             $this->runner->handle(['', 'arguments', '--value', 'value'])
+        );
+    }
+
+    public function testHandleCommandArgumentTypeOptionValue(): void
+    {
+        $date = DateTime::now()->toDateTime()->format('Y-m-d');
+
+        $this->assertSame(
+            0,
+            $this->runner->handle(['', 'type_options', '--test', $date])
         );
     }
 

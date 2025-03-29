@@ -5,6 +5,7 @@ namespace Fyre\Command;
 
 use Fyre\Console\Console;
 use Fyre\Container\Container;
+use Fyre\DB\TypeParser;
 use Fyre\Event\EventDispatcherTrait;
 use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
@@ -60,6 +61,8 @@ class CommandRunner
 
     protected array $namespaces = [];
 
+    protected TypeParser $typeParser;
+
     /**
      * New CommandRunner constructor.
      *
@@ -68,14 +71,16 @@ class CommandRunner
      * @param Inflector $inflector The Inflector.
      * @param Console $io The Console.
      * @param EventManager $eventManager The EventManager.
+     * @param TypeParser $typeParser The TypeParser.
      */
-    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, EventManager $eventManager)
+    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, EventManager $eventManager, TypeParser $typeParser)
     {
         $this->container = $container;
         $this->loader = $loader;
         $this->inflector = $inflector;
         $this->io = $io;
         $this->eventManager = $eventManager;
+        $this->typeParser = $typeParser;
     }
 
     /**
@@ -280,9 +285,11 @@ class CommandRunner
 
             $data['text'] ??= '';
             $data['values'] ??= null;
-            $data['boolean'] ??= false;
             $data['required'] ??= false;
+            $data['as'] ??= 'string';
             $data['default'] ??= null;
+
+            $type = $this->typeParser->use($data['as']);
 
             if (is_array($data['values'])) {
                 $optionKeys = array_is_list($data['values']) ?
@@ -297,25 +304,29 @@ class CommandRunner
                 if ($data['required']) {
                     while ($value === null) {
                         $value = $this->io->choice($data['text'], $data['values'], $data['default']);
+                        $value = $type->parse($value);
                     }
                 } else {
                     $value ??= $data['default'];
+                    $value = $type->parse($value);
                 }
-            } else if ($data['boolean']) {
+            } else if ($data['as'] === 'boolean') {
                 if ($value === null) {
                     if ($data['required']) {
                         $value = $this->io->confirm($data['text'], (bool) ($data['default'] ?? true));
                     } else {
-                        $value = $data['default'];
+                        $value = (bool) $data['default'];
                     }
                 } else {
-                    $value = !in_array($value, [false, '0', 'n', 'no'], true);
+                    $value = $value && !in_array($value, ['false', 'n', 'no'], true);
                 }
             } else {
                 if (is_bool($value)) {
                     $this->io->error('Invalid value for: '.$key);
                     $value = null;
                 }
+
+                $value = $type->parse($value);
 
                 if ($value === null) {
                     if ($data['required']) {
@@ -327,9 +338,11 @@ class CommandRunner
 
                         while ($value === null) {
                             $value = $this->io->prompt($text) ?: $data['default'];
+                            $value = $type->parse($value);
                         }
                     } else {
                         $value = $data['default'];
+                        $value = $type->parse($value);
                     }
                 }
             }
