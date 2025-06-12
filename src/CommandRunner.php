@@ -51,17 +51,7 @@ class CommandRunner
 
     protected array|null $commands = null;
 
-    protected Container $container;
-
-    protected Inflector $inflector;
-
-    protected Console $io;
-
-    protected Loader $loader;
-
     protected array $namespaces = [];
-
-    protected TypeParser $typeParser;
 
     /**
      * New CommandRunner constructor.
@@ -73,15 +63,14 @@ class CommandRunner
      * @param EventManager $eventManager The EventManager.
      * @param TypeParser $typeParser The TypeParser.
      */
-    public function __construct(Container $container, Loader $loader, Inflector $inflector, Console $io, EventManager $eventManager, TypeParser $typeParser)
-    {
-        $this->container = $container;
-        $this->loader = $loader;
-        $this->inflector = $inflector;
-        $this->io = $io;
-        $this->eventManager = $eventManager;
-        $this->typeParser = $typeParser;
-    }
+    public function __construct(
+        protected Container $container,
+        protected Loader $loader,
+        protected Inflector $inflector,
+        protected Console $io,
+        protected EventManager $eventManager,
+        protected TypeParser $typeParser
+    ) {}
 
     /**
      * Add a namespace for loading commands.
