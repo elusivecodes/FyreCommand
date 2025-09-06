@@ -10,6 +10,7 @@ use Fyre\Event\EventDispatcherTrait;
 use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
 use Fyre\Utility\Inflector;
+use Fyre\Utility\Traits\MacroTrait;
 use ReflectionClass;
 
 use function array_diff;
@@ -48,6 +49,7 @@ use const SORT_NATURAL;
 class CommandRunner
 {
     use EventDispatcherTrait;
+    use MacroTrait;
 
     protected array|null $commands = null;
 

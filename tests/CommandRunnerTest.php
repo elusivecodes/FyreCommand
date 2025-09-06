@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Fyre\Command\Command;
 use Fyre\Command\CommandRunner;
 use Fyre\Console\Console;
 use Fyre\Container\Container;
@@ -11,6 +12,7 @@ use Fyre\Event\Event;
 use Fyre\Event\EventManager;
 use Fyre\Loader\Loader;
 use Fyre\Utility\Inflector;
+use Fyre\Utility\Traits\MacroTrait;
 use PHPUnit\Framework\TestCase;
 use Tests\Mock\ArgumentsCommand;
 use Tests\Mock\BoolOptionsCommand;
@@ -18,6 +20,7 @@ use Tests\Mock\OptionsCommand;
 use Tests\Mock\TestCommand;
 use Tests\Mock\TypeOptionsCommand;
 
+use function class_uses;
 use function file_get_contents;
 use function file_put_contents;
 use function fopen;
@@ -348,6 +351,19 @@ final class CommandRunnerTest extends TestCase
     {
         $this->assertFalse(
             $this->runner->hasNamespace('Tests\Invalid')
+        );
+    }
+
+    public function testMacroable(): void
+    {
+        $this->assertContains(
+            MacroTrait::class,
+            class_uses(CommandRunner::class)
+        );
+
+        $this->assertContains(
+            MacroTrait::class,
+            class_uses(Command::class)
         );
     }
 
