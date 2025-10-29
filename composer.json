@@ -20,13 +20,13 @@
         }
     },
     "require": {
-        "fyre/console": "^4.0",
-        "fyre/container": "^1.0",
-        "fyre/event": "^4.0",
-        "fyre/inflector": "^3.0",
-        "fyre/loader": "^3.0",
-        "fyre/macro": "^1.0",
-        "fyre/typeparser": "^5.0"
+        "fyre/console": "^5.0",
+        "fyre/container": "^2.0",
+        "fyre/event": "^5.0",
+        "fyre/inflector": "^4.0",
+        "fyre/loader": "^4.0",
+        "fyre/macro": "^2.0",
+        "fyre/typeparser": "^6.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.59",

@@ -224,7 +224,7 @@ final class CommandRunnerTest extends TestCase
 
     public function testHandleCommandArgumentTypeOptionValue(): void
     {
-        $date = DateTime::now()->toDateTime()->format('Y-m-d');
+        $date = DateTime::now()->toNativeDateTime()->format('Y-m-d');
 
         $this->assertSame(
             0,
